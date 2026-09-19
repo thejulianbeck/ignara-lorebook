@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.15</title>
+  <title>Ignara · 0.16</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -95,7 +95,7 @@
           <canvas id="boot-canvas" width="497" height="152"></canvas>
         </button>
         <span class="tm">™</span>
-        <span class="muted">versión 0.15 · tocar para entrar</span>
+        <span class="muted">versión 0.16 · tocar para entrar</span>
       </div>
     </section>
 
@@ -116,7 +116,7 @@
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.15.</p>
+Marcador de posición · versión 0.16.</p>
       <span class="tag">placeholder</span>
     </section>
 
@@ -140,18 +140,18 @@ El texto canónico lo escribe Julián.</p>
     <section class="screen" id="boot-tests">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Pruebas de portada</h2>
-      <p class="intro">Diez entradas del wordmark. Tocá una: corre la animación y llega al resultado.</p>
+      <p class="intro">Diez entradas del wordmark (la principal ahora es ASCII morph, ~0.75s, sin zoom). Tocá una para probar.</p>
       <div class="list">
-        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>1 · Zoom dither</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>2 · Soft fade</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>3 · Punch</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>4 · Rise</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>5 · Snap flash</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>6 · Sink</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>7 · Slices</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>8 · Bloom</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>9 · Hard cut</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="drift" data-label="Drift"><span>10 · Drift</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>1 · ASCII morph</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>2 · Zoom dither</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>3 · Soft fade</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>4 · Punch</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>5 · Rise</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>6 · Snap flash</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>7 · Sink</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>8 · Slices</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>9 · Bloom</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>10 · Hard cut</span><span class="arrow">→</span></a>
       </div>
     </section>
 
@@ -204,7 +204,7 @@ Para consultas sobre derechos: contactar al autor.</p>
       var logoReady = false;
       var pendingBoot = "zoomDither";
       var pendingLabel = "Zoom dither";
-      var defaultBoot = "zoomDither";
+      var defaultBoot = "asciiMorph";
 
       var BAYER = [
         [0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],
@@ -332,9 +332,79 @@ Para consultas sobre derechos: contactar al autor.</p>
         layer.style.opacity = "0";
       }
 
+
+      function drawAsciiMorph(ctx, canvas, host, progress) {
+        // progress 0..1: center→out becomes ASCII, then center→out fades away
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        var w = size.w, h = size.h, dpr = size.dpr;
+        var scale = 0.72;
+        var lw = w * scale, lh = h * scale;
+        var x0 = (w - lw) / 2, y0 = (h - lh) / 2;
+
+        var off = document.createElement("canvas");
+        off.width = Math.max(1, Math.floor(lw * dpr));
+        off.height = Math.max(1, Math.floor(lh * dpr));
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, lw, lh);
+        octx.drawImage(logoImg, 0, 0, lw, lh);
+        var sample = octx.getImageData(0, 0, off.width, off.height).data;
+
+        ctx.clearRect(0, 0, w, h);
+        var cell = 7;
+        var cols = Math.ceil(lw / cell);
+        var rows = Math.ceil(lh / cell);
+        var cx = cols / 2, cy = rows / 2;
+        var maxR = Math.sqrt(cx * cx + cy * cy) || 1;
+        var chars = " .:-=+*#%@";
+        ctx.font = "6px IBM Plex Mono, ui-monospace, monospace";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+
+        // phase: 0-0.55 convert solid→ascii from inside; 0.55-1 ascii→gone from inside
+        var convertP = Math.min(1, progress / 0.55);
+        var fadeP = progress < 0.55 ? 0 : (progress - 0.55) / 0.45;
+
+        for (var row = 0; row < rows; row++) {
+          for (var col = 0; col < cols; col++) {
+            var px = Math.min(off.width - 1, Math.floor((col + 0.5) / cols * off.width));
+            var py = Math.min(off.height - 1, Math.floor((row + 0.5) / rows * off.height));
+            var si = (py * off.width + px) * 4;
+            if (sample[si + 3] < 40) continue;
+
+            var dx = col - cx, dy = row - cy;
+            var r = Math.sqrt(dx * dx + dy * dy) / maxR;
+            var dxCss = x0 + (col + 0.5) * cell;
+            var dyCss = y0 + (row + 0.5) * cell;
+
+            if (r > convertP + 0.04) {
+              // still solid outer ring
+              ctx.fillStyle = "#111";
+              ctx.fillRect(dxCss - cell * 0.45, dyCss - cell * 0.45, cell * 0.9, cell * 0.9);
+              continue;
+            }
+            if (r > fadeP + 0.06 || fadeP <= 0) {
+              // ASCII region
+              var bright = 1 - (sample[si] / 255);
+              var ci = Math.min(chars.length - 1, Math.floor(bright * (chars.length - 1)));
+              ctx.fillStyle = "#111";
+              ctx.fillText(chars[ci], dxCss, dyCss);
+            }
+            // else gone (inner faded)
+          }
+        }
+      }
+
       async function runBoot(kind, ctx, canvas, host, thenHash) {
         var start = 0.42;
-        if (kind === "zoomDither") {
+        if (kind === "asciiMorph") {
+          var steps = 30; // ~750ms at 25ms
+          for (var i = 0; i <= steps; i++) {
+            drawAsciiMorph(ctx, canvas, host, i / steps);
+            await wait(25);
+          }
+        } else if (kind === "zoomDither") {
           var steps = 18;
           for (var i = 0; i <= steps; i++) {
             var p = i / steps;
