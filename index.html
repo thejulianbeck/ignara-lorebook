@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.13</title>
+  <title>Ignara · 0.14</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -39,9 +39,11 @@
     html:not(:has(.screen:target)) #home { display: flex; }
     .screen.is-active { display: flex; }
     html:has(.screen:target) .screen.is-active:not(:target) { display: none; }
-    .center { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0.85rem; }
+    .center {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; gap: 1rem;
+    }
     h1, h2, p { margin: 0; font-weight: 400; }
-    h1 { font-size: 1.125rem; letter-spacing: 0.06em; }
     h2 { font-size: 1rem; letter-spacing: 0.04em; margin-bottom: 1.15rem; }
     .muted { color: var(--muted); font-size: 0.875rem; letter-spacing: 0.02em; }
     .intro { color: var(--muted); margin: 0 0 1.85rem; max-width: 38ch; font-size: 0.9375rem; }
@@ -49,12 +51,7 @@
       color: inherit; text-decoration: none; -webkit-user-select: none; user-select: none;
       touch-action: manipulation;
     }
-    .home-btn {
-      display: inline-flex; flex-direction: column; gap: 0.4rem;
-      border-bottom: 1px solid var(--fg); padding: 0.85rem 0 0.65rem;
-      width: fit-content; max-width: 100%; min-height: 3.5rem;
-    }
-    .home-btn:active, .back:active, .list a:active { opacity: 0.55; }
+    .back:active, .list a:active, #boot-hit:active { opacity: 0.7; }
     .nav { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.85rem; min-height: 2.75rem; }
     .back {
       color: var(--muted); font-size: 0.8125rem; letter-spacing: 0.03em;
@@ -71,14 +68,26 @@
       display: inline-block; margin-top: 1.75rem; color: var(--muted);
       font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;
     }
+    #boot-hit {
+      border: none; background: none; padding: 0; margin: 0;
+      width: min(72vw, 16rem); aspect-ratio: 497 / 152;
+      display: block; cursor: pointer; touch-action: manipulation;
+    }
+    #boot-canvas {
+      width: 100%; height: 100%; display: block;
+    }
+    .tm {
+      font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em;
+      align-self: flex-end; margin: -0.35rem 0.15rem 0 0;
+    }
     #fx {
       position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: none;
       background: transparent;
     }
     #fx.is-on { display: block; pointer-events: auto; }
     #fx-layer {
-      position: absolute; inset: 0; background: #111;
-      will-change: transform, opacity;
+      position: absolute; inset: 0; background: #fff;
+      will-change: opacity;
     }
   </style>
 </head>
@@ -87,17 +96,18 @@
   <div id="app">
     <section class="screen" id="home">
       <div class="center">
-        <a class="home-btn" href="#hub" data-nav data-fx="fade">
-          <h1>Ignara, Lore Book</h1>
-          <span class="muted">versión 0.13</span>
-        </a>
+        <button type="button" id="boot-hit" aria-label="Abrir Ignara">
+          <canvas id="boot-canvas" width="497" height="152"></canvas>
+        </button>
+        <span class="tm">™</span>
+        <span class="muted">versión 0.14 · tocar para entrar</span>
       </div>
     </section>
 
     <section class="screen" id="hub">
       <div class="nav"><a class="back" href="#home" data-nav data-fx="fade">← inicio</a></div>
       <h2>Archivo</h2>
-      <p class="intro">Recopilación mínima del mundo de Ignara. Transición: fade.</p>
+      <p class="intro">Recopilación mínima del mundo de Ignara.</p>
       <div class="list">
         <a href="#world" data-nav data-fx="fade"><span>World</span><span class="arrow">→</span></a>
         <a href="#character-sheets" data-nav data-fx="fade"><span>Character sheets</span><span class="arrow">→</span></a>
@@ -110,7 +120,7 @@
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.13.</p>
+Marcador de posición · versión 0.14.</p>
       <span class="tag">placeholder</span>
     </section>
 
@@ -131,34 +141,48 @@ El texto canónico lo escribe Julián.</p>
       <span class="tag">placeholder</span>
     </section>
 
-
     <section class="screen" id="propiedad">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Propiedad</h2>
       <p class="body">Aviso de autoría y uso
 
-Ignara, Ignara Lore Book y los textos, nombres, conceptos y materiales publicados en este sitio son obra original de Julián, autor de la trilogía Ignara.
+Ignara™, Ignara Lore Book y los textos, nombres, conceptos, wordmark y materiales publicados en este sitio son obra original de Julián, autor de la trilogía Ignara.
 
 © 2026 Julián. Todos los derechos reservados.
 
 Queda prohibida la reproducción, distribución, modificación o uso comercial de estos materiales sin autorización previa y por escrito del autor.
 
-Este aviso documenta la autoría y el uso público de la obra. No constituye asesoría legal ni implica, por sí solo, el registro de una marca ante una oficina de propiedad intelectual.
+Este aviso documenta la autoría y el uso público de la obra y del signo Ignara™. No constituye asesoría legal ni implica el registro de una marca ante una oficina de propiedad intelectual.
 
 Primera publicación pública de este lorebook: 2026, en https://thejulianbeck.github.io/ignara-lorebook/
 
 Para consultas sobre derechos: contactar al autor.</p>
-      <span class="tag">aviso · no es marca registrada</span>
+      <span class="tag">aviso · ™ no es marca registrada</span>
     </section>
-
   </div>
   <script>
     (function () {
       var fx = document.getElementById("fx");
       var layer = document.getElementById("fx-layer");
+      var bootHit = document.getElementById("boot-hit");
+      var bootCanvas = document.getElementById("boot-canvas");
+      var bootCtx = bootCanvas.getContext("2d");
       var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
       var busy = false;
       var skipHash = false;
+      var logoImg = new Image();
+      var logoReady = false;
+
+      var BAYER = [
+        [0,32,8,40,2,34,10,42],
+        [48,16,56,24,50,18,58,26],
+        [12,44,4,36,14,46,6,38],
+        [60,28,52,20,62,30,54,22],
+        [3,35,11,43,1,33,9,41],
+        [51,19,59,27,49,17,57,25],
+        [15,47,7,39,13,45,5,37],
+        [63,31,55,23,61,29,53,21]
+      ];
 
       function syncActive(id) {
         screens.forEach(function (el) {
@@ -166,7 +190,6 @@ Para consultas sobre derechos: contactar al autor.</p>
         });
         window.scrollTo(0, 0);
       }
-
 
       function wait(ms) {
         return new Promise(function (r) { setTimeout(r, ms); });
@@ -190,28 +213,112 @@ Para consultas sobre derechos: contactar al autor.</p>
         });
       }
 
-      function resetLayer() {
-        layer.style.cssText = "";
-        layer.style.background = "#111";
-        layer.style.opacity = "1";
-        layer.style.transform = "none";
-        layer.style.transformOrigin = "center center";
+      function sizeBootCanvas() {
+        var rect = bootHit.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        bootCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        bootCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        bootCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { w: rect.width, h: rect.height };
       }
 
-      async function run(name, midFn) {
-        // Solo fade (elegido por Julián)
-        fx.classList.add("is-on");
-        resetLayer();
-        layer.style.background = "#fff";
-        layer.style.opacity = "0";
-        await tween(160, function (e) { layer.style.opacity = String(e); });
-        midFn();
-        await tween(160, function (e) { layer.style.opacity = String(1 - e); });
-        fx.classList.remove("is-on");
-        resetLayer();
+      function drawLogoSolid(scale) {
+        if (!logoReady) return;
+        var size = sizeBootCanvas();
+        var w = size.w;
+        var h = size.h;
+        bootCtx.clearRect(0, 0, w, h);
+        var lw = w * scale;
+        var lh = h * scale;
+        var x = (w - lw) / 2;
+        var y = (h - lh) / 2;
+        bootCtx.imageSmoothingEnabled = true;
+        bootCtx.drawImage(logoImg, x, y, lw, lh);
       }
 
-      async function go(toId, name, label) {
+      function drawLogoDither(scale, dissolve) {
+        // dissolve 0 = solid, 1 = fully gone
+        if (!logoReady) return;
+        var size = sizeBootCanvas();
+        var w = size.w;
+        var h = size.h;
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var off = document.createElement("canvas");
+        off.width = bootCanvas.width;
+        off.height = bootCanvas.height;
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, w, h);
+        var lw = w * scale;
+        var lh = h * scale;
+        var x = (w - lw) / 2;
+        var y = (h - lh) / 2;
+        octx.drawImage(logoImg, x, y, lw, lh);
+
+        var img = octx.getImageData(0, 0, off.width, off.height);
+        var data = img.data;
+        var cw = off.width;
+        var ch = off.height;
+        for (var py = 0; py < ch; py++) {
+          for (var px = 0; px < cw; px++) {
+            var i = (py * cw + px) * 4;
+            var a = data[i + 3];
+            if (a < 8) continue;
+            var thresh = (BAYER[py & 7][px & 7] + 0.5) / 64;
+            if (dissolve > thresh) {
+              data[i + 3] = 0;
+            } else {
+              // keep solid black
+              data[i] = 0;
+              data[i + 1] = 0;
+              data[i + 2] = 0;
+              data[i + 3] = 255;
+            }
+          }
+        }
+        bootCtx.setTransform(1, 0, 0, 1, 0, 0);
+        bootCtx.clearRect(0, 0, bootCanvas.width, bootCanvas.height);
+        bootCtx.putImageData(img, 0, 0);
+        bootCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      async function bootOpen() {
+        if (busy) return;
+        busy = true;
+        try {
+          var start = 0.42;
+          var end = 2.35;
+          var steps = 28;
+          for (var i = 0; i <= steps; i++) {
+            var p = i / steps;
+            var e = easeOut(p);
+            var scale = start + (end - start) * e;
+            var dissolve = Math.max(0, (p - 0.25) / 0.75);
+            if (p < 0.28) drawLogoSolid(scale);
+            else drawLogoDither(scale, dissolve);
+            await wait(22);
+          }
+          bootCtx.clearRect(0, 0, bootCanvas.width, bootCanvas.height);
+
+          // short white fade into hub
+          fx.classList.add("is-on");
+          layer.style.opacity = "0";
+          await tween(120, function (e) { layer.style.opacity = String(e); });
+          skipHash = true;
+          location.hash = "hub";
+          syncActive("hub");
+          skipHash = false;
+          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
+          fx.classList.remove("is-on");
+          layer.style.opacity = "0";
+          // reset idle logo for when user returns home
+          drawLogoSolid(0.42);
+        } finally {
+          busy = false;
+        }
+      }
+
+      async function fadeNav(toId) {
         if (busy) return;
         var to = document.getElementById(toId);
         if (!to) return;
@@ -219,37 +326,45 @@ Para consultas sobre derechos: contactar al autor.</p>
           document.querySelector(".screen.is-active") ||
           document.querySelector(".screen:target") ||
           document.getElementById("home");
-        if (from && from.id === toId && toId !== "anim-result") return;
-
-        name = name || "fade";
+        if (from && from.id === toId) return;
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           skipHash = true;
           location.hash = toId;
           syncActive(toId);
           skipHash = false;
+          if (toId === "home") drawLogoSolid(0.42);
           return;
         }
 
         busy = true;
         try {
-          await run(name, function () {
-            skipHash = true;
-            location.hash = toId;
-            syncActive(toId);
-            skipHash = false;
-          });
+          fx.classList.add("is-on");
+          layer.style.opacity = "0";
+          await tween(140, function (e) { layer.style.opacity = String(e); });
+          skipHash = true;
+          location.hash = toId;
+          syncActive(toId);
+          skipHash = false;
+          if (toId === "home") drawLogoSolid(0.42);
+          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
+          fx.classList.remove("is-on");
         } finally {
           busy = false;
         }
       }
+
+      bootHit.addEventListener("click", function (e) {
+        e.preventDefault();
+        bootOpen();
+      });
 
       document.querySelectorAll("[data-nav]").forEach(function (el) {
         el.addEventListener("click", function (e) {
           var href = el.getAttribute("href") || "";
           if (href.charAt(0) !== "#") return;
           e.preventDefault();
-          go(href.slice(1), el.getAttribute("data-fx") || "fade", el.getAttribute("data-label") || "");
+          fadeNav(href.slice(1));
         });
       });
 
@@ -258,7 +373,29 @@ Para consultas sobre derechos: contactar al autor.</p>
         var id = (location.hash || "#home").slice(1);
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
+        if (id === "home") drawLogoSolid(0.42);
       });
+
+      window.addEventListener("resize", function () {
+        if (document.getElementById("home").classList.contains("is-active")) {
+          drawLogoSolid(0.42);
+        }
+      });
+
+      logoImg.onload = function () {
+        logoReady = true;
+        drawLogoSolid(0.42);
+      };
+      logoImg.onerror = function () {
+        // fallback text if svg fails
+        var size = sizeBootCanvas();
+        bootCtx.clearRect(0, 0, size.w, size.h);
+        bootCtx.fillStyle = "#111";
+        bootCtx.font = "20px IBM Plex Mono, monospace";
+        bootCtx.textAlign = "center";
+        bootCtx.fillText("IGNARA", size.w / 2, size.h / 2);
+      };
+      logoImg.src = "ignara-wordmark.svg";
 
       var start = (location.hash || "#home").slice(1);
       if (!document.getElementById(start)) start = "home";
