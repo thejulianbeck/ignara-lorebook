@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Ignara · 0.07</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --fg: #111;
+      --muted: #666;
+      --line: #e8e8e8;
+      --pad: max(1.25rem, env(safe-area-inset-left));
+      --pad-r: max(1.25rem, env(safe-area-inset-right));
+    }
+    * { box-sizing: border-box; }
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #fff;
+      color: var(--fg);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    #app {
+      position: relative;
+      width: min(100%, 28rem);
+      min-height: 100dvh;
+      padding: max(1.75rem, env(safe-area-inset-top)) var(--pad) max(2.25rem, env(safe-area-inset-bottom)) var(--pad-r);
+      display: flex;
+      flex-direction: column;
+    }
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+    }
+    .screen:target { display: flex; }
+    html:not(:has(.screen:target)) #home { display: flex; }
+    .screen.is-active { display: flex; }
+    html:has(.screen:target) .screen.is-active:not(:target) { display: none; }
+
+    .center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.85rem;
+    }
+    h1, h2, p { margin: 0; font-weight: 400; }
+    h1 { font-size: 1.125rem; letter-spacing: 0.06em; }
+    h2 { font-size: 1rem; letter-spacing: 0.04em; margin-bottom: 1.15rem; }
+    .muted { color: var(--muted); font-size: 0.875rem; letter-spacing: 0.02em; }
+    .group {
+      margin: 1.25rem 0 0.35rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .intro {
+      color: var(--muted);
+      margin: 0 0 1.85rem;
+      max-width: 38ch;
+      font-size: 0.9375rem;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .home-btn {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      border-bottom: 1px solid var(--fg);
+      padding: 0.85rem 0 0.65rem;
+      width: fit-content;
+      max-width: 100%;
+      min-height: 3.5rem;
+    }
+    .home-btn:active,
+    .back:active,
+    .list a:active { opacity: 0.55; }
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.85rem;
+      min-height: 2.75rem;
+    }
+    .back {
+      color: var(--muted);
+      font-size: 0.8125rem;
+      letter-spacing: 0.03em;
+      padding: 0.65rem 0;
+      min-height: 2.75rem;
+      display: inline-flex;
+      align-items: center;
+    }
+    .list {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--line);
+    }
+    .list a {
+      padding: 1.1rem 0;
+      min-height: 3rem;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+    }
+    .arrow { color: var(--muted); font-size: 0.875rem; flex-shrink: 0; }
+    .body {
+      color: var(--fg);
+      max-width: 38ch;
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+    }
+    .tag {
+      display: inline-block;
+      margin-top: 1.75rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* JS-driven curtain — visible even in Files Quick Look */
+    #fx {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      display: none;
+      background: #fff;
+    }
+    #fx.is-on {
+      display: block;
+      pointer-events: auto;
+    }
+    #fx-layer {
+      position: absolute;
+      inset: 0;
+      background: #111;
+    }
+    #fx.skin-mist #fx-layer {
+      background: #fff;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.08);
+    }
+    #fx.skin-leaves #fx-layer {
+      background: repeating-linear-gradient(
+        -12deg,
+        #111 0 10px,
+        #fff 10px 22px
+      );
+    }
+    #fx.skin-water #fx-layer {
+      background: radial-gradient(circle at 50% 50%, #fff 0%, #111 68%);
+    }
+    #fx.skin-glitch #fx-layer {
+      background:
+        linear-gradient(#111 0 0) 0 18% / 100% 8%,
+        linear-gradient(#fff 0 0) 0 42% / 100% 6%,
+        linear-gradient(#111 0 0) 0 70% / 100% 12%,
+        #fff;
+      background-repeat: no-repeat;
+    }
+    #fx.skin-scan #fx-layer {
+      background: repeating-linear-gradient(
+        to bottom,
+        #111 0 2px,
+        #fff 2px 5px
+      );
+    }
+    #fx.skin-dither #fx-layer {
+      background:
+        radial-gradient(#111 0.7px, transparent 0.8px) 0 0 / 5px 5px,
+        radial-gradient(#111 0.55px, transparent 0.65px) 2px 2px / 7px 7px,
+        #fff;
+    }
+    #fx.skin-velvet #fx-layer { background: #111; }
+    #fx.skin-silk #fx-layer {
+      background: linear-gradient(90deg, #111 0%, #444 50%, #111 100%);
+    }
+    #fx.skin-gold #fx-layer {
+      background: #fff;
+      border: 12px solid #111;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div id="fx" aria-hidden="true"><div id="fx-layer"></div></div>
+  <div id="app">
+    <section class="screen" id="home">
+      <div class="center">
+        <a class="home-btn" href="#hub" data-nav data-fx="mist">
+          <h1>Ignara, Lore Book</h1>
+          <span class="muted">versión 0.07</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="screen" id="hub">
+      <div class="nav">
+        <a class="back" href="#home" data-nav data-fx="mist">← inicio</a>
+      </div>
+      <h2>Archivo</h2>
+      <p class="intro">Recopilación mínima del mundo de Ignara. Las pruebas de animación usan una cortina a prueba de la vista previa de Archivos.</p>
+      <div class="list">
+        <a href="#world" data-nav data-fx="mist"><span>World</span><span class="arrow">→</span></a>
+        <a href="#character-sheets" data-nav data-fx="mist"><span>Character sheets</span><span class="arrow">→</span></a>
+        <a href="#anim-tests" data-nav data-fx="mist"><span>Pruebas de animación</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="world">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="mist">← archivo</a></div>
+      <h2>World</h2>
+      <p class="body">Prueba — World.
+
+Marcador de posición · versión 0.07.</p>
+      <span class="tag">placeholder</span>
+    </section>
+
+    <section class="screen" id="character-sheets">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="mist">← archivo</a></div>
+      <h2>Character sheets</h2>
+      <div class="list" style="margin-bottom: 1.5rem;">
+        <a href="#sam" data-nav data-fx="mist"><span>Sam</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="sam">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="mist">← character sheets</a></div>
+      <h2>Sam</h2>
+      <p class="body">Prueba — Sam.
+
+El texto canónico lo escribe Julián.</p>
+      <span class="tag">placeholder</span>
+    </section>
+
+    <section class="screen" id="anim-tests">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="mist">← archivo</a></div>
+      <h2>Pruebas de animación</h2>
+      <p class="intro">Al tocar, una cortina cubre la pantalla, cambia el contenido y se retira. Misma llegada; nueve texturas distintas (blanco/negro/mono).</p>
+
+      <p class="group">Naturaleza</p>
+      <div class="list">
+        <a href="#anim-result" data-nav data-fx="mist" data-label="Niebla"><span>1 · Niebla</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="leaves" data-label="Hojas"><span>2 · Hojas</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="water" data-label="Agua"><span>3 · Agua</span><span class="arrow">→</span></a>
+      </div>
+
+      <p class="group">Cyberpunk</p>
+      <div class="list">
+        <a href="#anim-result" data-nav data-fx="glitch" data-label="Glitch"><span>4 · Glitch</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="scan" data-label="Scanlines"><span>5 · Scanlines</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="dither" data-label="Dither"><span>6 · Dither</span><span class="arrow">→</span></a>
+      </div>
+
+      <p class="group">Lujo</p>
+      <div class="list">
+        <a href="#anim-result" data-nav data-fx="velvet" data-label="Terciopelo"><span>7 · Terciopelo</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="silk" data-label="Seda"><span>8 · Seda</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="gold" data-label="Oro tipográfico"><span>9 · Oro tipográfico</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="anim-result">
+      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="mist">← pruebas</a></div>
+      <h2 id="result-title">Transición</h2>
+      <p class="body" id="result-body">Acabas de ver la transición.</p>
+      <span class="tag" id="result-tag">demo</span>
+    </section>
+  </div>
+  <script>
+    (function () {
+      var fx = document.getElementById("fx");
+      var layer = document.getElementById("fx-layer");
+      var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
+      var busy = false;
+      var skipHash = false;
+      var lastLabel = "Transición";
+      var lastMood = "demo";
+      var moods = {
+        mist: "naturaleza", leaves: "naturaleza", water: "naturaleza",
+        glitch: "cyberpunk", scan: "cyberpunk", dither: "cyberpunk",
+        velvet: "lujo", silk: "lujo", gold: "lujo"
+      };
+      var skins = Object.keys(moods);
+
+      function syncActive(id) {
+        screens.forEach(function (el) {
+          el.classList.toggle("is-active", el.id === id);
+        });
+        window.scrollTo(0, 0);
+      }
+
+      function fillResult(label, mood) {
+        lastLabel = label || "Transición";
+        lastMood = mood || "demo";
+        document.getElementById("result-title").textContent = lastLabel;
+        document.getElementById("result-body").textContent =
+          "Eso fue \"" + lastLabel +
+          "\": cortina a pantalla completa y luego el texto. Si la viste, la transición está funcionando en esta vista.";
+        document.getElementById("result-tag").textContent = lastMood;
+      }
+
+      function setSkin(name) {
+        skins.forEach(function (s) { fx.classList.remove("skin-" + s); });
+        fx.classList.add("skin-" + (name || "mist"));
+      }
+
+      function tween(from, to, ms, apply) {
+        return new Promise(function (resolve) {
+          var t0 = null;
+          function frame(now) {
+            if (t0 === null) t0 = now;
+            var p = Math.min(1, (now - t0) / ms);
+            // ease in-out
+            var e = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+            apply(from + (to - from) * e, p);
+            if (p < 1) requestAnimationFrame(frame);
+            else resolve();
+          }
+          requestAnimationFrame(frame);
+        });
+      }
+
+      async function curtain(name, midFn) {
+        setSkin(name);
+        fx.classList.add("is-on");
+        fx.style.opacity = "0";
+        layer.style.transform = "translate(0,0) scale(1)";
+        layer.style.opacity = "1";
+
+        // Cover
+        if (name === "silk") {
+          layer.style.transform = "translateX(-100%)";
+          fx.style.opacity = "1";
+          await tween(0, 1, 420, function (v) {
+            layer.style.transform = "translateX(" + (-100 + v * 100) + "%)";
+          });
+        } else if (name === "water") {
+          fx.style.opacity = "1";
+          await tween(0.15, 1, 480, function (v) {
+            layer.style.transform = "scale(" + v + ")";
+            fx.style.opacity = String(Math.min(1, v * 1.2));
+          });
+        } else if (name === "glitch") {
+          fx.style.opacity = "1";
+          var kicks = [0, 0.25, 0.45, 0.7, 1];
+          for (var i = 0; i < kicks.length; i++) {
+            layer.style.transform = "translate(" + ((i % 2) ? 6 : -5) + "px, " + ((i % 3) - 1) * 3 + "px)";
+            fx.style.opacity = String(0.35 + kicks[i] * 0.65);
+            await new Promise(function (r) { setTimeout(r, 70); });
+          }
+          fx.style.opacity = "1";
+          layer.style.transform = "none";
+        } else if (name === "leaves") {
+          fx.style.opacity = "1";
+          await tween(0, 1, 450, function (v) {
+            layer.style.transform = "translateY(" + (24 - v * 24) + "px) rotate(" + (-2 + v * 2) + "deg)";
+            fx.style.opacity = String(v);
+          });
+        } else if (name === "gold") {
+          await tween(0, 1, 520, function (v) {
+            fx.style.opacity = String(v);
+            layer.style.transform = "scale(" + (1.08 - v * 0.08) + ")";
+          });
+        } else {
+          // mist, scan, dither, velvet — solid opacity cover
+          await tween(0, 1, name === "velvet" ? 560 : 420, function (v) {
+            fx.style.opacity = String(v);
+          });
+        }
+
+        if (midFn) midFn();
+
+        // Reveal
+        if (name === "silk") {
+          await tween(0, 1, 420, function (v) {
+            layer.style.transform = "translateX(" + (v * 100) + "%)";
+          });
+        } else if (name === "water") {
+          await tween(1, 1.35, 420, function (v, p) {
+            layer.style.transform = "scale(" + v + ")";
+            fx.style.opacity = String(1 - p);
+          });
+        } else if (name === "glitch") {
+          for (var j = 0; j < 4; j++) {
+            layer.style.transform = "translate(" + ((j % 2) ? -4 : 5) + "px, 0)";
+            fx.style.opacity = String(1 - j * 0.22);
+            await new Promise(function (r) { setTimeout(r, 60); });
+          }
+          fx.style.opacity = "0";
+        } else if (name === "leaves") {
+          await tween(0, 1, 450, function (v) {
+            layer.style.transform = "translateY(" + (-v * 28) + "px) rotate(" + (v * 2) + "deg)";
+            fx.style.opacity = String(1 - v);
+          });
+        } else {
+          await tween(1, 0, name === "velvet" ? 560 : 420, function (v) {
+            fx.style.opacity = String(v);
+          });
+        }
+
+        fx.classList.remove("is-on");
+        fx.style.opacity = "0";
+        layer.style.transform = "none";
+      }
+
+      async function go(toId, name, label) {
+        if (busy) return;
+        var to = document.getElementById(toId);
+        if (!to) return;
+        var from =
+          document.querySelector(".screen.is-active") ||
+          document.querySelector(".screen:target") ||
+          document.getElementById("home");
+        if (from && from.id === toId && toId !== "anim-result") return;
+
+        name = name || "mist";
+        if (toId === "anim-result") fillResult(label, moods[name]);
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          skipHash = true;
+          location.hash = toId;
+          syncActive(toId);
+          skipHash = false;
+          return;
+        }
+
+        busy = true;
+        try {
+          await curtain(name, function () {
+            skipHash = true;
+            location.hash = toId;
+            syncActive(toId);
+            skipHash = false;
+          });
+        } finally {
+          busy = false;
+        }
+      }
+
+      document.querySelectorAll("[data-nav]").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+          var href = el.getAttribute("href") || "";
+          if (href.charAt(0) !== "#") return;
+          e.preventDefault();
+          go(href.slice(1), el.getAttribute("data-fx") || "mist", el.getAttribute("data-label") || "");
+        });
+      });
+
+      window.addEventListener("hashchange", function () {
+        if (skipHash) return;
+        var id = (location.hash || "#home").slice(1);
+        if (!document.getElementById(id)) id = "home";
+        syncActive(id);
+        if (id === "anim-result") fillResult(lastLabel, lastMood);
+      });
+
+      var start = (location.hash || "#home").slice(1);
+      if (!document.getElementById(start)) start = "home";
+      syncActive(start);
+    })();
+  </script>
+</body>
+</html>
