@@ -5,16 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.14</title>
+  <title>Ignara · 0.15</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
       color-scheme: light;
-      --fg: #111;
-      --muted: #666;
-      --line: #e8e8e8;
+      --fg: #111; --muted: #666; --line: #e8e8e8;
       --pad: max(1.25rem, env(safe-area-inset-left));
       --pad-r: max(1.25rem, env(safe-area-inset-right));
     }
@@ -73,8 +71,9 @@
       width: min(72vw, 16rem); aspect-ratio: 497 / 152;
       display: block; cursor: pointer; touch-action: manipulation;
     }
-    #boot-canvas {
-      width: 100%; height: 100%; display: block;
+    #boot-canvas, #stage-canvas { width: 100%; height: 100%; display: block; }
+    #stage-wrap {
+      width: min(72vw, 16rem); aspect-ratio: 497 / 152; margin: 2rem auto 0;
     }
     .tm {
       font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em;
@@ -82,13 +81,9 @@
     }
     #fx {
       position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: none;
-      background: transparent;
     }
     #fx.is-on { display: block; pointer-events: auto; }
-    #fx-layer {
-      position: absolute; inset: 0; background: #fff;
-      will-change: opacity;
-    }
+    #fx-layer { position: absolute; inset: 0; background: #fff; }
   </style>
 </head>
 <body>
@@ -100,7 +95,7 @@
           <canvas id="boot-canvas" width="497" height="152"></canvas>
         </button>
         <span class="tm">™</span>
-        <span class="muted">versión 0.14 · tocar para entrar</span>
+        <span class="muted">versión 0.15 · tocar para entrar</span>
       </div>
     </section>
 
@@ -111,6 +106,7 @@
       <div class="list">
         <a href="#world" data-nav data-fx="fade"><span>World</span><span class="arrow">→</span></a>
         <a href="#character-sheets" data-nav data-fx="fade"><span>Character sheets</span><span class="arrow">→</span></a>
+        <a href="#boot-tests" data-nav data-fx="fade"><span>Pruebas de portada</span><span class="arrow">→</span></a>
         <a href="#propiedad" data-nav data-fx="fade"><span>Propiedad</span><span class="arrow">→</span></a>
       </div>
     </section>
@@ -120,7 +116,7 @@
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.14.</p>
+Marcador de posición · versión 0.15.</p>
       <span class="tag">placeholder</span>
     </section>
 
@@ -139,6 +135,37 @@ Marcador de posición · versión 0.14.</p>
 
 El texto canónico lo escribe Julián.</p>
       <span class="tag">placeholder</span>
+    </section>
+
+    <section class="screen" id="boot-tests">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Pruebas de portada</h2>
+      <p class="intro">Diez entradas del wordmark. Tocá una: corre la animación y llega al resultado.</p>
+      <div class="list">
+        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>1 · Zoom dither</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>2 · Soft fade</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>3 · Punch</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>4 · Rise</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>5 · Snap flash</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>6 · Sink</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>7 · Slices</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>8 · Bloom</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>9 · Hard cut</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="drift" data-label="Drift"><span>10 · Drift</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="boot-stage">
+      <div class="nav"><a class="back" href="#boot-tests" data-nav data-fx="fade">← pruebas</a></div>
+      <p class="muted" id="stage-hint" style="text-align:center;">Preparando…</p>
+      <div id="stage-wrap"><canvas id="stage-canvas" width="497" height="152"></canvas></div>
+    </section>
+
+    <section class="screen" id="boot-result">
+      <div class="nav"><a class="back" href="#boot-tests" data-nav data-fx="fade">← pruebas</a></div>
+      <h2 id="boot-result-title">Portada</h2>
+      <p class="body" id="boot-result-body">Acabas de ver la animación de entrada.</p>
+      <span class="tag">demo portada</span>
     </section>
 
     <section class="screen" id="propiedad">
@@ -167,21 +194,23 @@ Para consultas sobre derechos: contactar al autor.</p>
       var bootHit = document.getElementById("boot-hit");
       var bootCanvas = document.getElementById("boot-canvas");
       var bootCtx = bootCanvas.getContext("2d");
+      var stageCanvas = document.getElementById("stage-canvas");
+      var stageCtx = stageCanvas.getContext("2d");
+      var stageWrap = document.getElementById("stage-wrap");
       var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
       var busy = false;
       var skipHash = false;
       var logoImg = new Image();
       var logoReady = false;
+      var pendingBoot = "zoomDither";
+      var pendingLabel = "Zoom dither";
+      var defaultBoot = "zoomDither";
 
       var BAYER = [
-        [0,32,8,40,2,34,10,42],
-        [48,16,56,24,50,18,58,26],
-        [12,44,4,36,14,46,6,38],
-        [60,28,52,20,62,30,54,22],
-        [3,35,11,43,1,33,9,41],
-        [51,19,59,27,49,17,57,25],
-        [15,47,7,39,13,45,5,37],
-        [63,31,55,23,61,29,53,21]
+        [0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],
+        [12,44,4,36,14,46,6,38],[60,28,52,20,62,30,54,22],
+        [3,35,11,43,1,33,9,41],[51,19,59,27,49,17,57,25],
+        [15,47,7,39,13,45,5,37],[63,31,55,23,61,29,53,21]
       ];
 
       function syncActive(id) {
@@ -195,9 +224,7 @@ Para consultas sobre derechos: contactar al autor.</p>
         return new Promise(function (r) { setTimeout(r, ms); });
       }
 
-      function easeOut(p) {
-        return 1 - Math.pow(1 - p, 3);
-      }
+      function easeOut(p) { return 1 - Math.pow(1 - p, 3); }
 
       function tween(ms, apply) {
         return new Promise(function (resolve) {
@@ -213,108 +240,197 @@ Para consultas sobre derechos: contactar al autor.</p>
         });
       }
 
-      function sizeBootCanvas() {
-        var rect = bootHit.getBoundingClientRect();
+      function sizeCanvas(canvas, ctx, host) {
+        var rect = host.getBoundingClientRect();
         var dpr = Math.min(window.devicePixelRatio || 1, 2);
-        bootCanvas.width = Math.max(1, Math.floor(rect.width * dpr));
-        bootCanvas.height = Math.max(1, Math.floor(rect.height * dpr));
-        bootCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        return { w: rect.width, h: rect.height };
+        canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { w: rect.width, h: rect.height, dpr: dpr };
       }
 
-      function drawLogoSolid(scale) {
+      function drawSolid(ctx, canvas, host, scale, ox, oy, alpha) {
         if (!logoReady) return;
-        var size = sizeBootCanvas();
-        var w = size.w;
-        var h = size.h;
-        bootCtx.clearRect(0, 0, w, h);
-        var lw = w * scale;
-        var lh = h * scale;
-        var x = (w - lw) / 2;
-        var y = (h - lh) / 2;
-        bootCtx.imageSmoothingEnabled = true;
-        bootCtx.drawImage(logoImg, x, y, lw, lh);
+        ox = ox || 0; oy = oy || 0; alpha = alpha == null ? 1 : alpha;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        ctx.globalAlpha = alpha;
+        var lw = size.w * scale;
+        var lh = size.h * scale;
+        var x = (size.w - lw) / 2 + ox * size.w;
+        var y = (size.h - lh) / 2 + oy * size.h;
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(logoImg, x, y, lw, lh);
+        ctx.globalAlpha = 1;
       }
 
-      function drawLogoDither(scale, dissolve) {
-        // dissolve 0 = solid, 1 = fully gone
+      function drawDither(ctx, canvas, host, scale, dissolve, ox, oy) {
         if (!logoReady) return;
-        var size = sizeBootCanvas();
-        var w = size.w;
-        var h = size.h;
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        ox = ox || 0; oy = oy || 0;
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
         var off = document.createElement("canvas");
-        off.width = bootCanvas.width;
-        off.height = bootCanvas.height;
+        off.width = canvas.width; off.height = canvas.height;
         var octx = off.getContext("2d");
         octx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        octx.clearRect(0, 0, w, h);
-        var lw = w * scale;
-        var lh = h * scale;
-        var x = (w - lw) / 2;
-        var y = (h - lh) / 2;
+        octx.clearRect(0, 0, size.w, size.h);
+        var lw = size.w * scale;
+        var lh = size.h * scale;
+        var x = (size.w - lw) / 2 + ox * size.w;
+        var y = (size.h - lh) / 2 + oy * size.h;
         octx.drawImage(logoImg, x, y, lw, lh);
-
         var img = octx.getImageData(0, 0, off.width, off.height);
         var data = img.data;
-        var cw = off.width;
-        var ch = off.height;
-        for (var py = 0; py < ch; py++) {
-          for (var px = 0; px < cw; px++) {
-            var i = (py * cw + px) * 4;
-            var a = data[i + 3];
-            if (a < 8) continue;
+        for (var py = 0; py < off.height; py++) {
+          for (var px = 0; px < off.width; px++) {
+            var i = (py * off.width + px) * 4;
+            if (data[i + 3] < 8) continue;
             var thresh = (BAYER[py & 7][px & 7] + 0.5) / 64;
-            if (dissolve > thresh) {
-              data[i + 3] = 0;
-            } else {
-              // keep solid black
-              data[i] = 0;
-              data[i + 1] = 0;
-              data[i + 2] = 0;
-              data[i + 3] = 255;
-            }
+            if (dissolve > thresh) data[i + 3] = 0;
+            else { data[i] = data[i+1] = data[i+2] = 0; data[i+3] = 255; }
           }
         }
-        bootCtx.setTransform(1, 0, 0, 1, 0, 0);
-        bootCtx.clearRect(0, 0, bootCanvas.width, bootCanvas.height);
-        bootCtx.putImageData(img, 0, 0);
-        bootCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(img, 0, 0);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawSlices(ctx, canvas, host, scale, progress) {
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        var bands = 10;
+        var lh = size.h * scale;
+        var lw = size.w * scale;
+        var x = (size.w - lw) / 2;
+        var y = (size.h - lh) / 2;
+        for (var b = 0; b < bands; b++) {
+          var local = Math.min(1, Math.max(0, (progress - b * 0.06) / 0.35));
+          if (local <= 0) continue;
+          var sy = (b / bands) * logoImg.height;
+          var sh = logoImg.height / bands;
+          var dy = y + (b / bands) * lh;
+          var dh = lh / bands;
+          var slide = (1 - local) * (b % 2 === 0 ? -40 : 40);
+          ctx.globalAlpha = local;
+          ctx.drawImage(logoImg, 0, sy, logoImg.width, sh, x + slide, dy, lw, dh);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      async function whiteGate(thenHash) {
+        fx.classList.add("is-on");
+        layer.style.opacity = "0";
+        await tween(90, function (e) { layer.style.opacity = String(e); });
+        skipHash = true;
+        location.hash = thenHash;
+        syncActive(thenHash);
+        skipHash = false;
+        await tween(110, function (e) { layer.style.opacity = String(1 - e); });
+        fx.classList.remove("is-on");
+        layer.style.opacity = "0";
+      }
+
+      async function runBoot(kind, ctx, canvas, host, thenHash) {
+        var start = 0.42;
+        if (kind === "zoomDither") {
+          var steps = 18;
+          for (var i = 0; i <= steps; i++) {
+            var p = i / steps;
+            var e = easeOut(p);
+            var scale = start + (2.2 - start) * e;
+            var dissolve = Math.max(0, (p - 0.2) / 0.8);
+            if (p < 0.22) drawSolid(ctx, canvas, host, scale, 0, 0, 1);
+            else drawDither(ctx, canvas, host, scale, dissolve, 0, 0);
+            await wait(14);
+          }
+        } else if (kind === "softFade") {
+          await tween(280, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.55, 0, 0, 1 - e);
+          });
+        } else if (kind === "punch") {
+          await tween(160, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 1.6, 0, 0, 1 - e * 0.85);
+          });
+        } else if (kind === "rise") {
+          await tween(260, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.3, 0, 0.35 * (1 - e), 1 - e);
+          });
+        } else if (kind === "snapFlash") {
+          drawSolid(ctx, canvas, host, start, 0, 0, 1);
+          await wait(60);
+          fx.classList.add("is-on");
+          layer.style.background = "#fff";
+          layer.style.opacity = "1";
+          await wait(50);
+        } else if (kind === "sink") {
+          await tween(260, function (e) {
+            drawSolid(ctx, canvas, host, start * (1 - e * 0.7), 0, e * 0.08, 1 - e);
+          });
+        } else if (kind === "slices") {
+          for (var s = 0; s <= 16; s++) {
+            drawSlices(ctx, canvas, host, start, s / 16);
+            await wait(16);
+          }
+          await tween(120, function (e) {
+            drawSlices(ctx, canvas, host, start + e * 0.4, 1);
+            ctx.globalAlpha = 1 - e;
+          });
+          ctx.globalAlpha = 1;
+        } else if (kind === "bloom") {
+          await tween(240, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.9, 0, 0, 1 - e);
+            if (e > 0.4) {
+              fx.classList.add("is-on");
+              layer.style.opacity = String((e - 0.4) / 0.6 * 0.85);
+            }
+          });
+        } else if (kind === "hardCut") {
+          drawSolid(ctx, canvas, host, start, 0, 0, 1);
+          await wait(40);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          await wait(30);
+        } else if (kind === "drift") {
+          await tween(240, function (e) {
+            drawSolid(ctx, canvas, host, start, 0, -e * 0.55, 1 - e);
+          });
+        } else {
+          await tween(200, function (e) {
+            drawSolid(ctx, canvas, host, start + e, 0, 0, 1 - e);
+          });
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+        if (host === bootHit) drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
       }
 
       async function bootOpen() {
         if (busy) return;
         busy = true;
         try {
-          var start = 0.42;
-          var end = 2.35;
-          var steps = 28;
-          for (var i = 0; i <= steps; i++) {
-            var p = i / steps;
-            var e = easeOut(p);
-            var scale = start + (end - start) * e;
-            var dissolve = Math.max(0, (p - 0.25) / 0.75);
-            if (p < 0.28) drawLogoSolid(scale);
-            else drawLogoDither(scale, dissolve);
-            await wait(22);
-          }
-          bootCtx.clearRect(0, 0, bootCanvas.width, bootCanvas.height);
-
-          // short white fade into hub
-          fx.classList.add("is-on");
-          layer.style.opacity = "0";
-          await tween(120, function (e) { layer.style.opacity = String(e); });
-          skipHash = true;
-          location.hash = "hub";
-          syncActive("hub");
-          skipHash = false;
-          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
-          fx.classList.remove("is-on");
-          layer.style.opacity = "0";
-          // reset idle logo for when user returns home
-          drawLogoSolid(0.42);
+          await runBoot(defaultBoot, bootCtx, bootCanvas, bootHit, "hub");
         } finally {
           busy = false;
+        }
+      }
+
+      async function runStageBoot() {
+        if (busy) return;
+        busy = true;
+        document.getElementById("stage-hint").textContent = pendingLabel + "…";
+        try {
+          drawSolid(stageCtx, stageCanvas, stageWrap, 0.42, 0, 0, 1);
+          await wait(120);
+          await runBoot(pendingBoot, stageCtx, stageCanvas, stageWrap, "boot-result");
+        } finally {
+          busy = false;
+          document.getElementById("stage-hint").textContent = "";
         }
       }
 
@@ -333,22 +449,29 @@ Para consultas sobre derechos: contactar al autor.</p>
           location.hash = toId;
           syncActive(toId);
           skipHash = false;
-          if (toId === "home") drawLogoSolid(0.42);
+          if (toId === "home") drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          if (toId === "boot-stage") runStageBoot();
           return;
         }
 
         busy = true;
         try {
           fx.classList.add("is-on");
+          layer.style.background = "#fff";
           layer.style.opacity = "0";
-          await tween(140, function (e) { layer.style.opacity = String(e); });
+          await tween(120, function (e) { layer.style.opacity = String(e); });
           skipHash = true;
           location.hash = toId;
           syncActive(toId);
           skipHash = false;
-          if (toId === "home") drawLogoSolid(0.42);
-          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
+          if (toId === "home") drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          await tween(120, function (e) { layer.style.opacity = String(1 - e); });
           fx.classList.remove("is-on");
+          if (toId === "boot-stage") {
+            busy = false;
+            await runStageBoot();
+            return;
+          }
         } finally {
           busy = false;
         }
@@ -368,32 +491,32 @@ Para consultas sobre derechos: contactar al autor.</p>
         });
       });
 
+      document.querySelectorAll("[data-boot]").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+          e.preventDefault();
+          pendingBoot = el.getAttribute("data-boot") || "zoomDither";
+          pendingLabel = el.getAttribute("data-label") || pendingBoot;
+          fadeNav("boot-stage");
+        });
+      });
+
       window.addEventListener("hashchange", function () {
         if (skipHash) return;
         var id = (location.hash || "#home").slice(1);
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
-        if (id === "home") drawLogoSolid(0.42);
+        if (id === "home") drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
       });
 
       window.addEventListener("resize", function () {
         if (document.getElementById("home").classList.contains("is-active")) {
-          drawLogoSolid(0.42);
+          drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
         }
       });
 
       logoImg.onload = function () {
         logoReady = true;
-        drawLogoSolid(0.42);
-      };
-      logoImg.onerror = function () {
-        // fallback text if svg fails
-        var size = sizeBootCanvas();
-        bootCtx.clearRect(0, 0, size.w, size.h);
-        bootCtx.fillStyle = "#111";
-        bootCtx.font = "20px IBM Plex Mono, monospace";
-        bootCtx.textAlign = "center";
-        bootCtx.fillText("IGNARA", size.w / 2, size.h / 2);
+        drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
       };
       logoImg.src = "ignara-wordmark.svg";
 
