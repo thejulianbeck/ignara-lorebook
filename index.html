@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.11</title>
+  <title>Ignara · 0.12</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -73,53 +73,57 @@
     }
     #fx {
       position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: none;
+      background: transparent;
     }
     #fx.is-on { display: block; pointer-events: auto; }
-    #fx-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #fx-layer {
+      position: absolute; inset: 0; background: #111;
+      will-change: transform, opacity;
+    }
   </style>
 </head>
 <body>
-  <div id="fx" aria-hidden="true"><canvas id="fx-canvas"></canvas></div>
+  <div id="fx" aria-hidden="true"><div id="fx-layer"></div></div>
   <div id="app">
     <section class="screen" id="home">
       <div class="center">
-        <a class="home-btn" href="#hub" data-nav data-fx="dissolve">
+        <a class="home-btn" href="#hub" data-nav data-fx="fade">
           <h1>Ignara, Lore Book</h1>
-          <span class="muted">versión 0.11</span>
+          <span class="muted">versión 0.12</span>
         </a>
       </div>
     </section>
 
     <section class="screen" id="hub">
-      <div class="nav"><a class="back" href="#home" data-nav data-fx="dissolve">← inicio</a></div>
+      <div class="nav"><a class="back" href="#home" data-nav data-fx="fade">← inicio</a></div>
       <h2>Archivo</h2>
-      <p class="intro">Diez transiciones dither nuevas. Elige en Pruebas de animación.</p>
+      <p class="intro">Diez transiciones rápidas y simples. Probálas y elige.</p>
       <div class="list">
-        <a href="#world" data-nav data-fx="dissolve"><span>World</span><span class="arrow">→</span></a>
-        <a href="#character-sheets" data-nav data-fx="dissolve"><span>Character sheets</span><span class="arrow">→</span></a>
-        <a href="#anim-tests" data-nav data-fx="dissolve"><span>Pruebas de animación</span><span class="arrow">→</span></a>
+        <a href="#world" data-nav data-fx="fade"><span>World</span><span class="arrow">→</span></a>
+        <a href="#character-sheets" data-nav data-fx="fade"><span>Character sheets</span><span class="arrow">→</span></a>
+        <a href="#anim-tests" data-nav data-fx="fade"><span>Pruebas de animación</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="world">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dissolve">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.11.</p>
+Marcador de posición · versión 0.12.</p>
       <span class="tag">placeholder</span>
     </section>
 
     <section class="screen" id="character-sheets">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dissolve">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Character sheets</h2>
       <div class="list" style="margin-bottom: 1.5rem;">
-        <a href="#sam" data-nav data-fx="dissolve"><span>Sam</span><span class="arrow">→</span></a>
+        <a href="#sam" data-nav data-fx="fade"><span>Sam</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="sam">
-      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="dissolve">← character sheets</a></div>
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
       <h2>Sam</h2>
       <p class="body">Prueba — Sam.
 
@@ -128,64 +132,38 @@ El texto canónico lo escribe Julián.</p>
     </section>
 
     <section class="screen" id="anim-tests">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dissolve">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Pruebas de animación</h2>
-      <p class="intro">Diez wipes/disoluciones en dither. Tocá cada una para ver la transición completa.</p>
+      <p class="intro">Rápidas, limpias, sin dither. Cada toque dura menos de medio segundo.</p>
       <div class="list">
-        <a href="#anim-result" data-nav data-fx="dissolve" data-label="Dissolve"><span>1 · Dissolve</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="rise" data-label="Rise"><span>2 · Rise</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="fall" data-label="Fall"><span>3 · Fall</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="bloom" data-label="Bloom"><span>4 · Bloom</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="sweep" data-label="Sweep"><span>5 · Sweep</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="slash" data-label="Slash"><span>6 · Slash</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="venetian" data-label="Venetian"><span>7 · Venetian</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="spiral" data-label="Spiral"><span>8 · Spiral</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="static" data-label="Static"><span>9 · Static</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="ink" data-label="Ink"><span>10 · Ink</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="cut" data-label="Hard cut"><span>1 · Hard cut</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="fade" data-label="Fade"><span>2 · Fade</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="dip" data-label="Dip black"><span>3 · Dip black</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="flash" data-label="White flash"><span>4 · White flash</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="wipeup" data-label="Wipe up"><span>5 · Wipe up</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="wiperight" data-label="Wipe right"><span>6 · Wipe right</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="slideup" data-label="Slide up"><span>7 · Slide up</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="slideleft" data-label="Slide left"><span>8 · Slide left</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="punch" data-label="Punch"><span>9 · Punch</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="push" data-label="Push"><span>10 · Push</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="anim-result">
-      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="dissolve">← pruebas</a></div>
+      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="fade">← pruebas</a></div>
       <h2 id="result-title">Transición</h2>
-      <p class="body" id="result-body">Acabas de ver la transición dither.</p>
-      <span class="tag" id="result-tag">demo</span>
+      <p class="body" id="result-body">Acabas de ver la transición rápida.</p>
+      <span class="tag">demo</span>
     </section>
   </div>
   <script>
     (function () {
       var fx = document.getElementById("fx");
-      var canvas = document.getElementById("fx-canvas");
-      var ctx = canvas.getContext("2d");
+      var layer = document.getElementById("fx-layer");
       var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
       var busy = false;
       var skipHash = false;
       var lastLabel = "Transición";
-      var lastFx = "dissolve";
-
-      var BAYER = [
-        [0,32,8,40,2,34,10,42],
-        [48,16,56,24,50,18,58,26],
-        [12,44,4,36,14,46,6,38],
-        [60,28,52,20,62,30,54,22],
-        [3,35,11,43,1,33,9,41],
-        [51,19,59,27,49,17,57,25],
-        [15,47,7,39,13,45,5,37],
-        [63,31,55,23,61,29,53,21]
-      ];
-
-      var PALETTES = {
-        dissolve: [[17,17,17]],
-        rise: [[17,17,17],[40,40,40]],
-        fall: [[17,17,17]],
-        bloom: [[17,17,17],[60,60,60]],
-        sweep: [[17,17,17]],
-        slash: [[17,17,17],[30,30,30]],
-        venetian: [[17,17,17]],
-        spiral: [[17,17,17],[45,45,45]],
-        static: [[17,17,17],[80,80,80],[120,120,120]],
-        ink: [[10,10,18],[20,24,40],[8,8,12]]
-      };
 
       function syncActive(id) {
         screens.forEach(function (el) {
@@ -194,138 +172,127 @@ El texto canónico lo escribe Julián.</p>
         window.scrollTo(0, 0);
       }
 
-      function fillResult(label, name) {
+      function fillResult(label) {
         lastLabel = label || "Transición";
-        lastFx = name || "dissolve";
         document.getElementById("result-title").textContent = lastLabel;
         document.getElementById("result-body").textContent =
-          "Acabas de ver \"" + lastLabel + "\". Vuelve a pruebas para comparar.";
-        document.getElementById("result-tag").textContent = "dither";
+          "Acabas de ver \"" + lastLabel + "\". Rápida y simple. Vuelve a comparar.";
       }
 
       function wait(ms) {
         return new Promise(function (r) { setTimeout(r, ms); });
       }
 
-      function sizeCanvas() {
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.floor(window.innerWidth * dpr);
-        canvas.height = Math.floor(window.innerHeight * dpr);
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      function easeOut(p) {
+        return 1 - Math.pow(1 - p, 3);
       }
 
-      function maskClean(name, nx, ny, progress, covering) {
-        var p = progress;
-        if (name === "dissolve" || name === "static") {
-          return covering ? p : 1 - p;
-        }
-        if (name === "rise") {
-          return covering ? (ny <= p ? 1 : 0) : (ny >= p ? 1 : 0);
-        }
-        if (name === "fall") {
-          return covering ? (ny >= 1 - p ? 1 : 0) : (ny <= 1 - p ? 1 : 0);
-        }
-        if (name === "bloom") {
-          var d = Math.hypot(nx - 0.5, ny - 0.5) / 0.78;
-          return covering ? (d <= p ? 1 : 0) : (d >= p ? 1 : 0);
-        }
-        if (name === "sweep") {
-          return covering ? (nx <= p ? 1 : 0) : (nx >= p ? 1 : 0);
-        }
-        if (name === "slash") {
-          var diag = (nx + ny) * 0.5;
-          return covering ? (diag <= p ? 1 : 0) : (diag >= p ? 1 : 0);
-        }
-        if (name === "venetian") {
-          var row = Math.floor(ny * 20);
-          var stagger = (row % 2) * 0.12;
-          var gate = Math.max(0, Math.min(1, p - stagger));
-          return covering ? (ny <= gate ? 1 : 0) : (ny >= gate ? 1 : 0);
-        }
-        if (name === "spiral") {
-          var ang = (Math.atan2(ny - 0.5, nx - 0.5) + Math.PI) / (Math.PI * 2);
-          var rad = Math.hypot(nx - 0.5, ny - 0.5);
-          var spiral = (ang * 0.5 + rad * 0.95) % 1;
-          return covering ? (spiral <= p ? 1 : 0) : (spiral >= p ? 1 : 0);
-        }
-        if (name === "ink") {
-          var blot =
-            0.32 * Math.sin(nx * 6.2 + ny * 4.1) +
-            0.22 * Math.sin(nx * 12.0 - ny * 7.0) +
-            0.18 * Math.sin((nx + ny) * 9.5);
-          var ink = Math.hypot(nx - 0.5, ny - 0.55) / 0.88 - blot * 0.18;
-          return covering ? (ink <= p ? 1 : 0) : (ink >= p ? 1 : 0);
-        }
-        return covering ? p : 1 - p;
-      }
-
-      function pickColor(name, nx, ny, progress) {
-        var pals = PALETTES[name] || PALETTES.dissolve;
-        if (name === "static") {
-          var n = Math.floor((Math.sin(nx * 40 + ny * 70 + progress * 20) * 0.5 + 0.5) * pals.length);
-          return pals[Math.min(pals.length - 1, Math.max(0, n))];
-        }
-        if (name === "ink") {
-          var t = Math.hypot(nx - 0.5, ny - 0.55);
-          var i = t < 0.25 ? 0 : t < 0.5 ? 1 : 2;
-          return pals[i];
-        }
-        if (pals.length === 1) return pals[0];
-        return pals[Math.floor((nx + ny + progress) * 10) % pals.length];
-      }
-
-      function drawFrame(name, progress, covering) {
-        var w = window.innerWidth;
-        var h = window.innerHeight;
-        var cell = name === "static" ? 3 : 4;
-        var cols = Math.ceil(w / cell);
-        var rows = Math.ceil(h / cell);
-        ctx.clearRect(0, 0, w, h);
-
-        for (var y = 0; y < rows; y++) {
-          for (var x = 0; x < cols; x++) {
-            var nx = (x + 0.5) / cols;
-            var ny = (y + 0.5) / rows;
-            var mask = maskClean(name, nx, ny, progress, covering);
-            if (mask <= 0) continue;
-
-            var thresh = (BAYER[y & 7][x & 7] + 0.5) / 64;
-            var density;
-
-            if (name === "dissolve" || name === "static") {
-              density = covering ? progress : 1 - progress;
-            } else {
-              // Geometric wipe: entire filled region is dithered
-              density = 0.9 + mask * 0.1;
-            }
-
-            if (density <= thresh) continue;
-
-            var rgb = pickColor(name, nx, ny, progress);
-            var a = name === "static" ? 0.7 + density * 0.3 : 0.94;
-            ctx.fillStyle = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a + ")";
-            ctx.fillRect(x * cell, y * cell, cell, cell);
+      function tween(ms, apply) {
+        return new Promise(function (resolve) {
+          var t0 = null;
+          function frame(now) {
+            if (t0 === null) t0 = now;
+            var p = Math.min(1, (now - t0) / ms);
+            apply(easeOut(p), p);
+            if (p < 1) requestAnimationFrame(frame);
+            else resolve();
           }
-        }
+          requestAnimationFrame(frame);
+        });
       }
 
-      async function runDither(name, midFn) {
+      function resetLayer() {
+        layer.style.cssText = "";
+        layer.style.background = "#111";
+        layer.style.opacity = "1";
+        layer.style.transform = "none";
+        layer.style.transformOrigin = "center center";
+      }
+
+      async function run(name, midFn) {
         fx.classList.add("is-on");
-        sizeCanvas();
-        var steps = 34;
-        for (var i = 0; i <= steps; i++) {
-          drawFrame(name, i / steps, true);
-          await wait(20);
+        resetLayer();
+
+        if (name === "cut") {
+          layer.style.background = "#111";
+          layer.style.opacity = "1";
+          await wait(70);
+          midFn();
+          await wait(40);
+        } else if (name === "fade") {
+          layer.style.background = "#fff";
+          layer.style.opacity = "0";
+          await tween(160, function (e) { layer.style.opacity = String(e); });
+          midFn();
+          await tween(160, function (e) { layer.style.opacity = String(1 - e); });
+        } else if (name === "dip") {
+          layer.style.background = "#111";
+          layer.style.opacity = "0";
+          await tween(120, function (e) { layer.style.opacity = String(e); });
+          await wait(50);
+          midFn();
+          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
+        } else if (name === "flash") {
+          layer.style.background = "#fff";
+          layer.style.opacity = "0";
+          await tween(90, function (e) { layer.style.opacity = String(e); });
+          midFn();
+          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
+        } else if (name === "wipeup") {
+          layer.style.background = "#111";
+          layer.style.transformOrigin = "bottom center";
+          layer.style.transform = "scaleY(0)";
+          await tween(180, function (e) { layer.style.transform = "scaleY(" + e + ")"; });
+          midFn();
+          layer.style.transformOrigin = "top center";
+          await tween(180, function (e) { layer.style.transform = "scaleY(" + (1 - e) + ")"; });
+        } else if (name === "wiperight") {
+          layer.style.background = "#111";
+          layer.style.transformOrigin = "left center";
+          layer.style.transform = "scaleX(0)";
+          await tween(180, function (e) { layer.style.transform = "scaleX(" + e + ")"; });
+          midFn();
+          layer.style.transformOrigin = "right center";
+          await tween(180, function (e) { layer.style.transform = "scaleX(" + (1 - e) + ")"; });
+        } else if (name === "slideup") {
+          layer.style.background = "#111";
+          layer.style.transform = "translateY(100%)";
+          await tween(200, function (e) { layer.style.transform = "translateY(" + ((1 - e) * 100) + "%)"; });
+          midFn();
+          await tween(200, function (e) { layer.style.transform = "translateY(" + (-e * 100) + "%)"; });
+        } else if (name === "slideleft") {
+          layer.style.background = "#111";
+          layer.style.transform = "translateX(-100%)";
+          await tween(200, function (e) { layer.style.transform = "translateX(" + ((-1 + e) * 100) + "%)"; });
+          midFn();
+          await tween(200, function (e) { layer.style.transform = "translateX(" + (e * 100) + "%)"; });
+        } else if (name === "punch") {
+          layer.style.background = "#111";
+          layer.style.transformOrigin = "center";
+          layer.style.transform = "scale(0.6)";
+          layer.style.opacity = "0";
+          await tween(150, function (e) {
+            layer.style.opacity = String(e);
+            layer.style.transform = "scale(" + (0.6 + e * 0.4) + ")";
+          });
+          midFn();
+          await tween(150, function (e) {
+            layer.style.opacity = String(1 - e);
+            layer.style.transform = "scale(" + (1 + e * 0.08) + ")";
+          });
+        } else if (name === "push") {
+          // black bar pushes content feel: cover from bottom quickly, then leave upward
+          layer.style.background = "#111";
+          layer.style.transform = "translateY(100%)";
+          await tween(160, function (e) { layer.style.transform = "translateY(" + ((1 - e) * 100) + "%)"; });
+          midFn();
+          await tween(160, function (e) { layer.style.transform = "translateY(" + (-e * 100) + "%)"; });
+        } else {
+          midFn();
         }
-        midFn();
-        for (var j = 0; j <= steps; j++) {
-          drawFrame(name, j / steps, false);
-          await wait(20);
-        }
+
         fx.classList.remove("is-on");
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        resetLayer();
       }
 
       async function go(toId, name, label) {
@@ -338,8 +305,8 @@ El texto canónico lo escribe Julián.</p>
           document.getElementById("home");
         if (from && from.id === toId && toId !== "anim-result") return;
 
-        name = name || "dissolve";
-        if (toId === "anim-result") fillResult(label, name);
+        name = name || "fade";
+        if (toId === "anim-result") fillResult(label);
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           skipHash = true;
@@ -351,7 +318,7 @@ El texto canónico lo escribe Julián.</p>
 
         busy = true;
         try {
-          await runDither(name, function () {
+          await run(name, function () {
             skipHash = true;
             location.hash = toId;
             syncActive(toId);
@@ -367,7 +334,7 @@ El texto canónico lo escribe Julián.</p>
           var href = el.getAttribute("href") || "";
           if (href.charAt(0) !== "#") return;
           e.preventDefault();
-          go(href.slice(1), el.getAttribute("data-fx") || "dissolve", el.getAttribute("data-label") || "");
+          go(href.slice(1), el.getAttribute("data-fx") || "fade", el.getAttribute("data-label") || "");
         });
       });
 
@@ -376,7 +343,7 @@ El texto canónico lo escribe Julián.</p>
         var id = (location.hash || "#home").slice(1);
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
-        if (id === "anim-result") fillResult(lastLabel, lastFx);
+        if (id === "anim-result") fillResult(lastLabel);
       });
 
       var start = (location.hash || "#home").slice(1);
