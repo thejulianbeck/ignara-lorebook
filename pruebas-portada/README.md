@@ -1,15 +1,15 @@
-# Pruebas de portada (v0.15)
+# Pruebas de portada (v0.16)
 
-Diez variaciones de animación de entrada del wordmark Ignara.
-Se prueban en la app: Archivo → Pruebas de portada.
+Entrada principal (home): **ASCII morph** ~0.75s, sin zoom.
+Transiciones entre páginas: fade (cerrado, no tocar).
 
-1. Zoom dither — zoom + disolución dither (default, acelerado)
-2. Soft fade — escala suave + fade
-3. Punch — golpe rápido de escala
-4. Rise — sube desde abajo
-5. Snap flash — flash blanco y corte
-6. Sink — se hunde / aleja y se va
-7. Slices — bandas horizontales
-8. Bloom — brillo blanco y escala
-9. Hard cut — corte limpio
-10. Drift — desliza hacia arriba y desaparece
+1. ASCII morph — logo → ASCII desde el centro hacia afuera, luego se desvanece igual
+2. Zoom dither
+3. Soft fade
+4. Punch
+5. Rise
+6. Snap flash
+7. Sink
+8. Slices
+9. Bloom
+10. Hard cut
