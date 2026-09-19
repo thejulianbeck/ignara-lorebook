@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.10</title>
+  <title>Ignara · 0.11</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -19,195 +19,107 @@
       --pad-r: max(1.25rem, env(safe-area-inset-right));
     }
     * { box-sizing: border-box; }
-    html {
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-    }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     html, body {
-      margin: 0;
-      min-height: 100%;
-      background: #fff;
-      color: var(--fg);
+      margin: 0; min-height: 100%; background: #fff; color: var(--fg);
       font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: 16px;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
+      font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
     }
     body {
-      min-height: 100dvh;
-      display: flex;
-      justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      overflow-x: hidden;
+      min-height: 100dvh; display: flex; justify-content: center;
+      -webkit-tap-highlight-color: transparent; overflow-x: hidden;
     }
     #app {
-      position: relative;
-      width: min(100%, 28rem);
-      min-height: 100dvh;
+      position: relative; width: min(100%, 28rem); min-height: 100dvh;
       padding: max(1.75rem, env(safe-area-inset-top)) var(--pad) max(2.25rem, env(safe-area-inset-bottom)) var(--pad-r);
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
     }
-    .screen {
-      display: none;
-      flex: 1;
-      flex-direction: column;
-    }
+    .screen { display: none; flex: 1; flex-direction: column; }
     .screen:target { display: flex; }
     html:not(:has(.screen:target)) #home { display: flex; }
     .screen.is-active { display: flex; }
     html:has(.screen:target) .screen.is-active:not(:target) { display: none; }
-
-    .center {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 0.85rem;
-    }
+    .center { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0.85rem; }
     h1, h2, p { margin: 0; font-weight: 400; }
     h1 { font-size: 1.125rem; letter-spacing: 0.06em; }
     h2 { font-size: 1rem; letter-spacing: 0.04em; margin-bottom: 1.15rem; }
     .muted { color: var(--muted); font-size: 0.875rem; letter-spacing: 0.02em; }
-    .intro {
-      color: var(--muted);
-      margin: 0 0 1.85rem;
-      max-width: 38ch;
-      font-size: 0.9375rem;
-    }
+    .intro { color: var(--muted); margin: 0 0 1.85rem; max-width: 38ch; font-size: 0.9375rem; }
     a {
-      color: inherit;
-      text-decoration: none;
-      -webkit-user-select: none;
-      user-select: none;
+      color: inherit; text-decoration: none; -webkit-user-select: none; user-select: none;
       touch-action: manipulation;
     }
     .home-btn {
-      display: inline-flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      border-bottom: 1px solid var(--fg);
-      padding: 0.85rem 0 0.65rem;
-      width: fit-content;
-      max-width: 100%;
-      min-height: 3.5rem;
+      display: inline-flex; flex-direction: column; gap: 0.4rem;
+      border-bottom: 1px solid var(--fg); padding: 0.85rem 0 0.65rem;
+      width: fit-content; max-width: 100%; min-height: 3.5rem;
     }
-    .home-btn:active,
-    .back:active,
-    .list a:active { opacity: 0.55; }
-    .nav {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.85rem;
-      min-height: 2.75rem;
-    }
+    .home-btn:active, .back:active, .list a:active { opacity: 0.55; }
+    .nav { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.85rem; min-height: 2.75rem; }
     .back {
-      color: var(--muted);
-      font-size: 0.8125rem;
-      letter-spacing: 0.03em;
-      padding: 0.65rem 0;
-      min-height: 2.75rem;
-      display: inline-flex;
-      align-items: center;
+      color: var(--muted); font-size: 0.8125rem; letter-spacing: 0.03em;
+      padding: 0.65rem 0; min-height: 2.75rem; display: inline-flex; align-items: center;
     }
-    .list {
-      display: flex;
-      flex-direction: column;
-      border-top: 1px solid var(--line);
-    }
+    .list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
     .list a {
-      padding: 1.1rem 0;
-      min-height: 3rem;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 1rem;
+      padding: 1.1rem 0; min-height: 3rem; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
     }
     .arrow { color: var(--muted); font-size: 0.875rem; flex-shrink: 0; }
-    .body {
-      color: var(--fg);
-      max-width: 38ch;
-      white-space: pre-wrap;
-      font-size: 0.9375rem;
-    }
+    .body { color: var(--fg); max-width: 38ch; white-space: pre-wrap; font-size: 0.9375rem; }
     .tag {
-      display: inline-block;
-      margin-top: 1.75rem;
-      color: var(--muted);
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      display: inline-block; margin-top: 1.75rem; color: var(--muted);
+      font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;
     }
-
     #fx {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      pointer-events: none;
-      display: none;
-      background: transparent;
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: none;
     }
-    #fx.is-on {
-      display: block;
-      pointer-events: auto;
-    }
-    #fx-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      image-rendering: auto;
-    }
+    #fx.is-on { display: block; pointer-events: auto; }
+    #fx-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   </style>
 </head>
 <body>
-  <div id="fx" aria-hidden="true">
-    <canvas id="fx-canvas"></canvas>
-  </div>
+  <div id="fx" aria-hidden="true"><canvas id="fx-canvas"></canvas></div>
   <div id="app">
     <section class="screen" id="home">
       <div class="center">
-        <a class="home-btn" href="#hub" data-nav data-fx="fire">
+        <a class="home-btn" href="#hub" data-nav data-fx="dissolve">
           <h1>Ignara, Lore Book</h1>
-          <span class="muted">versión 0.10</span>
+          <span class="muted">versión 0.11</span>
         </a>
       </div>
     </section>
 
     <section class="screen" id="hub">
-      <div class="nav">
-        <a class="back" href="#home" data-nav data-fx="fire">← inicio</a>
-      </div>
+      <div class="nav"><a class="back" href="#home" data-nav data-fx="dissolve">← inicio</a></div>
       <h2>Archivo</h2>
-      <p class="intro">Recopilación mínima del mundo de Ignara. Transición: fire dither en wipe (llena de abajo arriba, se recoge igual; todo dither).</p>
+      <p class="intro">Diez transiciones dither nuevas. Elige en Pruebas de animación.</p>
       <div class="list">
-        <a href="#world" data-nav data-fx="fire"><span>World</span><span class="arrow">→</span></a>
-        <a href="#character-sheets" data-nav data-fx="fire"><span>Character sheets</span><span class="arrow">→</span></a>
-        <a href="#anim-tests" data-nav data-fx="fire"><span>Pruebas de animación</span><span class="arrow">→</span></a>
+        <a href="#world" data-nav data-fx="dissolve"><span>World</span><span class="arrow">→</span></a>
+        <a href="#character-sheets" data-nav data-fx="dissolve"><span>Character sheets</span><span class="arrow">→</span></a>
+        <a href="#anim-tests" data-nav data-fx="dissolve"><span>Pruebas de animación</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="world">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fire">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dissolve">← archivo</a></div>
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.10.</p>
+Marcador de posición · versión 0.11.</p>
       <span class="tag">placeholder</span>
     </section>
 
     <section class="screen" id="character-sheets">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fire">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dissolve">← archivo</a></div>
       <h2>Character sheets</h2>
       <div class="list" style="margin-bottom: 1.5rem;">
-        <a href="#sam" data-nav data-fx="fire"><span>Sam</span><span class="arrow">→</span></a>
+        <a href="#sam" data-nav data-fx="dissolve"><span>Sam</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="sam">
-      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fire">← character sheets</a></div>
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="dissolve">← character sheets</a></div>
       <h2>Sam</h2>
       <p class="body">Prueba — Sam.
 
@@ -216,22 +128,28 @@ El texto canónico lo escribe Julián.</p>
     </section>
 
     <section class="screen" id="anim-tests">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fire">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dissolve">← archivo</a></div>
       <h2>Pruebas de animación</h2>
-      <p class="intro">Solo una transición: wipe de fuego en dither (abajo→arriba y se recoge abajo→arriba), llamas grandes, azul/naranja/rojo.</p>
+      <p class="intro">Diez wipes/disoluciones en dither. Tocá cada una para ver la transición completa.</p>
       <div class="list">
-        <a href="#anim-result" data-nav data-fx="fire" data-label="Fire dither">
-          <span>1 · Fire dither</span>
-          <span class="arrow">→</span>
-        </a>
+        <a href="#anim-result" data-nav data-fx="dissolve" data-label="Dissolve"><span>1 · Dissolve</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="rise" data-label="Rise"><span>2 · Rise</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="fall" data-label="Fall"><span>3 · Fall</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="bloom" data-label="Bloom"><span>4 · Bloom</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="sweep" data-label="Sweep"><span>5 · Sweep</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="slash" data-label="Slash"><span>6 · Slash</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="venetian" data-label="Venetian"><span>7 · Venetian</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="spiral" data-label="Spiral"><span>8 · Spiral</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="static" data-label="Static"><span>9 · Static</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="ink" data-label="Ink"><span>10 · Ink</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="anim-result">
-      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="fire">← pruebas</a></div>
-      <h2 id="result-title">Fire dither</h2>
-      <p class="body" id="result-body">Eso fue el fire dither: wipe completo en dither, llamas grandes, de abajo hacia arriba.</p>
-      <span class="tag">demo</span>
+      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="dissolve">← pruebas</a></div>
+      <h2 id="result-title">Transición</h2>
+      <p class="body" id="result-body">Acabas de ver la transición dither.</p>
+      <span class="tag" id="result-tag">demo</span>
     </section>
   </div>
   <script>
@@ -242,8 +160,9 @@ El texto canónico lo escribe Julián.</p>
       var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
       var busy = false;
       var skipHash = false;
+      var lastLabel = "Transición";
+      var lastFx = "dissolve";
 
-      // Bayer 8x8 — dither delicado
       var BAYER = [
         [0,32,8,40,2,34,10,42],
         [48,16,56,24,50,18,58,26],
@@ -255,11 +174,33 @@ El texto canónico lo escribe Julián.</p>
         [63,31,55,23,61,29,53,21]
       ];
 
+      var PALETTES = {
+        dissolve: [[17,17,17]],
+        rise: [[17,17,17],[40,40,40]],
+        fall: [[17,17,17]],
+        bloom: [[17,17,17],[60,60,60]],
+        sweep: [[17,17,17]],
+        slash: [[17,17,17],[30,30,30]],
+        venetian: [[17,17,17]],
+        spiral: [[17,17,17],[45,45,45]],
+        static: [[17,17,17],[80,80,80],[120,120,120]],
+        ink: [[10,10,18],[20,24,40],[8,8,12]]
+      };
+
       function syncActive(id) {
         screens.forEach(function (el) {
           el.classList.toggle("is-active", el.id === id);
         });
         window.scrollTo(0, 0);
+      }
+
+      function fillResult(label, name) {
+        lastLabel = label || "Transición";
+        lastFx = name || "dissolve";
+        document.getElementById("result-title").textContent = lastLabel;
+        document.getElementById("result-body").textContent =
+          "Acabas de ver \"" + lastLabel + "\". Vuelve a pruebas para comparar.";
+        document.getElementById("result-tag").textContent = "dither";
       }
 
       function wait(ms) {
@@ -275,111 +216,119 @@ El texto canónico lo escribe Julián.</p>
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
-      function fireColor(t) {
-        // t 0 = base (azul intenso) → 1 = punta (rojo / negro)
-        if (t < 0.18) {
-          var u = t / 0.18;
-          return [
-            Math.round(40 + u * 80),
-            Math.round(60 + u * 100),
-            Math.round(200 + u * 55)
-          ];
+      function maskClean(name, nx, ny, progress, covering) {
+        var p = progress;
+        if (name === "dissolve" || name === "static") {
+          return covering ? p : 1 - p;
         }
-        if (t < 0.4) {
-          var u2 = (t - 0.18) / 0.22;
-          return [
-            Math.round(120 + u2 * 135),
-            Math.round(160 + u2 * 70),
-            Math.round(255 - u2 * 200)
-          ];
+        if (name === "rise") {
+          return covering ? (ny <= p ? 1 : 0) : (ny >= p ? 1 : 0);
         }
-        if (t < 0.7) {
-          var u3 = (t - 0.4) / 0.3;
-          return [
-            255,
-            Math.round(230 - u3 * 140),
-            Math.round(55 - u3 * 40)
-          ];
+        if (name === "fall") {
+          return covering ? (ny >= 1 - p ? 1 : 0) : (ny <= 1 - p ? 1 : 0);
         }
-        var u4 = (t - 0.7) / 0.3;
-        return [
-          Math.round(255 - u4 * 40),
-          Math.round(90 - u4 * 70),
-          Math.round(15 + u4 * 10)
-        ];
+        if (name === "bloom") {
+          var d = Math.hypot(nx - 0.5, ny - 0.5) / 0.78;
+          return covering ? (d <= p ? 1 : 0) : (d >= p ? 1 : 0);
+        }
+        if (name === "sweep") {
+          return covering ? (nx <= p ? 1 : 0) : (nx >= p ? 1 : 0);
+        }
+        if (name === "slash") {
+          var diag = (nx + ny) * 0.5;
+          return covering ? (diag <= p ? 1 : 0) : (diag >= p ? 1 : 0);
+        }
+        if (name === "venetian") {
+          var row = Math.floor(ny * 20);
+          var stagger = (row % 2) * 0.12;
+          var gate = Math.max(0, Math.min(1, p - stagger));
+          return covering ? (ny <= gate ? 1 : 0) : (ny >= gate ? 1 : 0);
+        }
+        if (name === "spiral") {
+          var ang = (Math.atan2(ny - 0.5, nx - 0.5) + Math.PI) / (Math.PI * 2);
+          var rad = Math.hypot(nx - 0.5, ny - 0.5);
+          var spiral = (ang * 0.5 + rad * 0.95) % 1;
+          return covering ? (spiral <= p ? 1 : 0) : (spiral >= p ? 1 : 0);
+        }
+        if (name === "ink") {
+          var blot =
+            0.32 * Math.sin(nx * 6.2 + ny * 4.1) +
+            0.22 * Math.sin(nx * 12.0 - ny * 7.0) +
+            0.18 * Math.sin((nx + ny) * 9.5);
+          var ink = Math.hypot(nx - 0.5, ny - 0.55) / 0.88 - blot * 0.18;
+          return covering ? (ink <= p ? 1 : 0) : (ink >= p ? 1 : 0);
+        }
+        return covering ? p : 1 - p;
       }
 
-      function drawFireFrame(progress, covering) {
+      function pickColor(name, nx, ny, progress) {
+        var pals = PALETTES[name] || PALETTES.dissolve;
+        if (name === "static") {
+          var n = Math.floor((Math.sin(nx * 40 + ny * 70 + progress * 20) * 0.5 + 0.5) * pals.length);
+          return pals[Math.min(pals.length - 1, Math.max(0, n))];
+        }
+        if (name === "ink") {
+          var t = Math.hypot(nx - 0.5, ny - 0.55);
+          var i = t < 0.25 ? 0 : t < 0.5 ? 1 : 2;
+          return pals[i];
+        }
+        if (pals.length === 1) return pals[0];
+        return pals[Math.floor((nx + ny + progress) * 10) % pals.length];
+      }
+
+      function drawFrame(name, progress, covering) {
         var w = window.innerWidth;
         var h = window.innerHeight;
-        var cell = 4;
+        var cell = name === "static" ? 3 : 4;
         var cols = Math.ceil(w / cell);
         var rows = Math.ceil(h / cell);
         ctx.clearRect(0, 0, w, h);
 
-        // Wipe front: 0 at bottom → 1 at top. Cover fills below front;
-        // reveal clears from bottom up (same direction).
-        var front = progress;
         for (var y = 0; y < rows; y++) {
-          var fromBottom = 1 - (y + 0.5) / rows;
-          var covered;
-          if (covering) {
-            covered = fromBottom <= front;
-          } else {
-            // retract: still-on fire sits above the clear front
-            covered = fromBottom >= front;
-          }
-          if (!covered) continue;
-
-          // Bigger flame tongues (large-scale noise)
-          var tongue =
-            0.55 +
-            0.28 * Math.sin(fromBottom * 7.2 + progress * 4.5) +
-            0.22 * Math.sin(fromBottom * 3.1 - progress * 2.8);
-          var rgb = fireColor(Math.min(1, Math.max(0, 1 - fromBottom * tongue)));
-
           for (var x = 0; x < cols; x++) {
-            var nx = x / cols;
-            var flame =
-              0.5 +
-              0.35 * Math.sin(nx * 11.0 + fromBottom * 9.0 + progress * 6.0) +
-              0.25 * Math.sin(nx * 5.5 - fromBottom * 4.0 + progress * 3.2) +
-              0.15 * Math.sin((nx + fromBottom) * 17.0 + progress * 8.0);
-            flame = Math.min(1, Math.max(0.2, flame));
-
-            // Soft edge only near the wipe front; interior stays fully dithered
-            var edge = Math.abs(fromBottom - front);
-            var density = edge < 0.1 ? 0.55 + (1 - edge / 0.1) * 0.45 : 1;
+            var nx = (x + 0.5) / cols;
+            var ny = (y + 0.5) / rows;
+            var mask = maskClean(name, nx, ny, progress, covering);
+            if (mask <= 0) continue;
 
             var thresh = (BAYER[y & 7][x & 7] + 0.5) / 64;
-            var local = density * flame;
-            if (local > thresh * 0.85) {
-              var a = Math.min(1, 0.55 + local * 0.45);
-              ctx.fillStyle = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a + ")";
-              ctx.fillRect(x * cell, y * cell, cell, cell);
+            var density;
+
+            if (name === "dissolve" || name === "static") {
+              density = covering ? progress : 1 - progress;
+            } else {
+              // Geometric wipe: entire filled region is dithered
+              density = 0.9 + mask * 0.1;
             }
+
+            if (density <= thresh) continue;
+
+            var rgb = pickColor(name, nx, ny, progress);
+            var a = name === "static" ? 0.7 + density * 0.3 : 0.94;
+            ctx.fillStyle = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a + ")";
+            ctx.fillRect(x * cell, y * cell, cell, cell);
           }
         }
       }
 
-      async function runFire(midFn) {
+      async function runDither(name, midFn) {
         fx.classList.add("is-on");
         sizeCanvas();
-        var steps = 40;
+        var steps = 34;
         for (var i = 0; i <= steps; i++) {
-          drawFireFrame(i / steps, true);
-          await wait(24);
+          drawFrame(name, i / steps, true);
+          await wait(20);
         }
         midFn();
         for (var j = 0; j <= steps; j++) {
-          drawFireFrame(j / steps, false);
-          await wait(24);
+          drawFrame(name, j / steps, false);
+          await wait(20);
         }
         fx.classList.remove("is-on");
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       }
 
-      async function go(toId) {
+      async function go(toId, name, label) {
         if (busy) return;
         var to = document.getElementById(toId);
         if (!to) return;
@@ -387,7 +336,10 @@ El texto canónico lo escribe Julián.</p>
           document.querySelector(".screen.is-active") ||
           document.querySelector(".screen:target") ||
           document.getElementById("home");
-        if (from && from.id === toId) return;
+        if (from && from.id === toId && toId !== "anim-result") return;
+
+        name = name || "dissolve";
+        if (toId === "anim-result") fillResult(label, name);
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           skipHash = true;
@@ -399,7 +351,7 @@ El texto canónico lo escribe Julián.</p>
 
         busy = true;
         try {
-          await runFire(function () {
+          await runDither(name, function () {
             skipHash = true;
             location.hash = toId;
             syncActive(toId);
@@ -415,7 +367,7 @@ El texto canónico lo escribe Julián.</p>
           var href = el.getAttribute("href") || "";
           if (href.charAt(0) !== "#") return;
           e.preventDefault();
-          go(href.slice(1));
+          go(href.slice(1), el.getAttribute("data-fx") || "dissolve", el.getAttribute("data-label") || "");
         });
       });
 
@@ -424,6 +376,7 @@ El texto canónico lo escribe Julián.</p>
         var id = (location.hash || "#home").slice(1);
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
+        if (id === "anim-result") fillResult(lastLabel, lastFx);
       });
 
       var start = (location.hash || "#home").slice(1);
