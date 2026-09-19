@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.16</title>
+  <title>Ignara · 0.17</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -72,6 +72,15 @@
       display: block; cursor: pointer; touch-action: manipulation;
     }
     #boot-canvas, #stage-canvas { width: 100%; height: 100%; display: block; }
+    #boot-gyro {
+      margin-top: 0.35rem; border: 1px solid var(--line); background: #fff;
+      color: var(--muted); font: inherit; font-size: 0.75rem; letter-spacing: 0.03em;
+      padding: 0.55rem 0.85rem; min-height: 2.5rem; border-radius: 0;
+      cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    #boot-gyro:active { opacity: 0.7; }
+    #boot-gyro.is-on { color: var(--fg); border-color: #ccc; }
+    #boot-gyro[hidden] { display: none; }
     #stage-wrap {
       width: min(72vw, 16rem); aspect-ratio: 497 / 152; margin: 2rem auto 0;
     }
@@ -95,7 +104,8 @@
           <canvas id="boot-canvas" width="497" height="152"></canvas>
         </button>
         <span class="tm">™</span>
-        <span class="muted">versión 0.16 · tocar para entrar</span>
+        <span class="muted">versión 0.17 · tocar para entrar</span>
+        <button type="button" id="boot-gyro">Activar inclinación</button>
       </div>
     </section>
 
@@ -116,7 +126,7 @@
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.16.</p>
+Marcador de posición · versión 0.17.</p>
       <span class="tag">placeholder</span>
     </section>
 
@@ -140,18 +150,19 @@ El texto canónico lo escribe Julián.</p>
     <section class="screen" id="boot-tests">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Pruebas de portada</h2>
-      <p class="intro">Diez entradas del wordmark (la principal ahora es ASCII morph, ~0.75s, sin zoom). Tocá una para probar.</p>
+      <p class="intro">Once entradas del wordmark (la principal ahora es metalGyro: metal + giroscopio, ~0.8s, sin zoom). Tocá una para probar.</p>
       <div class="list">
-        <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>1 · ASCII morph</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>2 · Zoom dither</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>3 · Soft fade</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>4 · Punch</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>5 · Rise</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>6 · Snap flash</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>7 · Sink</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>8 · Slices</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>9 · Bloom</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>10 · Hard cut</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="metalGyro" data-label="Metal gyro"><span>1 · Metal gyro</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>2 · ASCII morph</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>3 · Zoom dither</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>4 · Soft fade</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>5 · Punch</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>6 · Rise</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>7 · Snap flash</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>8 · Sink</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>9 · Slices</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>10 · Bloom</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>11 · Hard cut</span><span class="arrow">→</span></a>
       </div>
     </section>
 
@@ -202,9 +213,22 @@ Para consultas sobre derechos: contactar al autor.</p>
       var skipHash = false;
       var logoImg = new Image();
       var logoReady = false;
-      var pendingBoot = "zoomDither";
-      var pendingLabel = "Zoom dither";
-      var defaultBoot = "asciiMorph";
+      var pendingBoot = "metalGyro";
+      var pendingLabel = "Metal gyro";
+      var defaultBoot = "metalGyro";
+      var bootGyroBtn = document.getElementById("boot-gyro");
+      var metalIdleOn = false;
+      var metalRaf = 0;
+      var metalMask = null;
+      var metalMaskKey = "";
+      var lightTX = 0.35, lightTY = -0.45;
+      var lightX = 0.35, lightY = -0.45;
+      var gyroActive = false;
+      var gyroListening = false;
+      var metalEntering = false;
+      var metalBright = 0;
+      var metalBlur = 0;
+      var metalAlpha = 1;
 
       var BAYER = [
         [0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],
@@ -319,6 +343,240 @@ Para consultas sobre derechos: contactar al autor.</p>
         ctx.globalAlpha = 1;
       }
 
+
+      function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+
+      function buildMetalMask(cssW, cssH, dpr) {
+        var key = Math.round(cssW) + "x" + Math.round(cssH) + "@" + dpr.toFixed(2);
+        if (metalMask && metalMaskKey === key) return metalMask;
+        var scale = 0.72;
+        var lw = cssW * scale, lh = cssH * scale;
+        var x0 = (cssW - lw) / 2, y0 = (cssH - lh) / 2;
+        var pw = Math.max(1, Math.floor(cssW * dpr));
+        var ph = Math.max(1, Math.floor(cssH * dpr));
+        var off = document.createElement("canvas");
+        off.width = pw; off.height = ph;
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, cssW, cssH);
+        octx.drawImage(logoImg, x0, y0, lw, lh);
+        var img = octx.getImageData(0, 0, pw, ph);
+        var data = img.data;
+        var n = pw * ph;
+        var alpha = new Float32Array(n);
+        var edge = new Float32Array(n);
+        var nx = new Float32Array(n);
+        var ny = new Float32Array(n);
+        var nz = new Float32Array(n);
+        var INF = 1e6;
+        var i, x, y;
+        for (i = 0; i < n; i++) {
+          alpha[i] = data[i * 4 + 3] / 255;
+          edge[i] = alpha[i] > 0.06 ? INF : 0;
+        }
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) { edge[i] = 0; continue; }
+            var best = edge[i];
+            if (x > 0) best = Math.min(best, edge[i - 1] + 1);
+            if (y > 0) best = Math.min(best, edge[i - pw] + 1);
+            if (x > 0 && y > 0) best = Math.min(best, edge[i - pw - 1] + 1.414);
+            if (x + 1 < pw && y > 0) best = Math.min(best, edge[i - pw + 1] + 1.414);
+            edge[i] = best;
+          }
+        }
+        for (y = ph - 1; y >= 0; y--) {
+          for (x = pw - 1; x >= 0; x--) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) { edge[i] = 0; continue; }
+            var best2 = edge[i];
+            if (x + 1 < pw) best2 = Math.min(best2, edge[i + 1] + 1);
+            if (y + 1 < ph) best2 = Math.min(best2, edge[i + pw] + 1);
+            if (x + 1 < pw && y + 1 < ph) best2 = Math.min(best2, edge[i + pw + 1] + 1.414);
+            if (x > 0 && y + 1 < ph) best2 = Math.min(best2, edge[i + pw - 1] + 1.414);
+            edge[i] = best2;
+          }
+        }
+        for (y = 1; y < ph - 1; y++) {
+          for (x = 1; x < pw - 1; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) continue;
+            var gx = edge[i + 1] - edge[i - 1];
+            var gy = edge[i + pw] - edge[i - pw];
+            var bx = -gx, by = -gy, bz = 2.6;
+            var len = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
+            nx[i] = bx / len;
+            ny[i] = by / len;
+            nz[i] = bz / len;
+          }
+        }
+        metalMask = { pw: pw, ph: ph, alpha: alpha, edge: edge, nx: nx, ny: ny, nz: nz };
+        metalMaskKey = key;
+        return metalMask;
+      }
+
+      function drawMetalLogo(ctx, canvas, host, bright, blurAmt, alphaMul) {
+        if (!logoReady) return;
+        bright = bright || 0;
+        blurAmt = blurAmt || 0;
+        alphaMul = alphaMul == null ? 1 : alphaMul;
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
+        var mask = buildMetalMask(size.w, size.h, dpr);
+        var pw = mask.pw, ph = mask.ph;
+        var out = ctx.createImageData(pw, ph);
+        var od = out.data;
+        var lx = lightX, ly = lightY, lz = 0.85;
+        var llen = Math.sqrt(lx * lx + ly * ly + lz * lz) || 1;
+        lx /= llen; ly /= llen; lz /= llen;
+        var hx = lx, hy = ly, hz = lz + 1;
+        var hlen = Math.sqrt(hx * hx + hy * hy + hz * hz) || 1;
+        hx /= hlen; hy /= hlen; hz /= hlen;
+        var bevelR = 5.5 * dpr;
+        var i, x, y, a, ndot, shade, spec, g, edgeF, v;
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            a = mask.alpha[i];
+            if (a < 0.06) continue;
+            var nnx = mask.nx[i], nny = mask.ny[i], nnz = mask.nz[i] || 1;
+            ndot = nnx * lx + nny * ly + nnz * lz;
+            ndot = clamp01(ndot);
+            edgeF = clamp01(mask.edge[i] / bevelR);
+            // Soft bevel: brighter near rim when facing light
+            shade = 0.28 + 0.42 * ndot + 0.18 * (1 - edgeF) * ndot;
+            var nh = nnx * hx + nny * hy + nnz * hz;
+            nh = clamp01(nh);
+            spec = Math.pow(nh, 28) * 0.85 + Math.pow(nh, 8) * 0.22;
+            g = shade * 210 + spec * 255;
+            g = g * (1 - bright) + 255 * bright;
+            g = Math.max(0, Math.min(255, g));
+            v = i * 4;
+            od[v] = od[v + 1] = od[v + 2] = g;
+            od[v + 3] = Math.round(a * alphaMul * 255);
+          }
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (blurAmt > 0.01) {
+          var tmp = document.createElement("canvas");
+          tmp.width = pw; tmp.height = ph;
+          var tctx = tmp.getContext("2d");
+          tctx.putImageData(out, 0, 0);
+          ctx.save();
+          ctx.globalAlpha = alphaMul;
+          ctx.filter = "blur(" + (blurAmt * 10).toFixed(2) + "px)";
+          ctx.drawImage(tmp, 0, 0);
+          ctx.filter = "none";
+          ctx.restore();
+        } else {
+          ctx.putImageData(out, 0, 0);
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function metalIdleTick(now) {
+        if (!metalIdleOn) return;
+        metalRaf = requestAnimationFrame(metalIdleTick);
+        if (metalEntering) return;
+        // Lerp light toward target
+        lightX += (lightTX - lightX) * 0.12;
+        lightY += (lightTY - lightY) * 0.12;
+        if (!gyroActive) {
+          var t = (now || performance.now()) * 0.001;
+          lightTX = Math.sin(t * 0.55) * 0.55 + Math.sin(t * 0.23) * 0.15;
+          lightTY = Math.cos(t * 0.41) * 0.4 - 0.15;
+        }
+        if (document.getElementById("home").classList.contains("is-active")) {
+          drawMetalLogo(bootCtx, bootCanvas, bootHit, 0, 0, 1);
+        }
+      }
+
+      function startMetalIdle() {
+        if (metalIdleOn) return;
+        metalIdleOn = true;
+        metalEntering = false;
+        metalBright = 0;
+        metalBlur = 0;
+        metalAlpha = 1;
+        metalRaf = requestAnimationFrame(metalIdleTick);
+      }
+
+      function stopMetalIdle() {
+        metalIdleOn = false;
+        if (metalRaf) cancelAnimationFrame(metalRaf);
+        metalRaf = 0;
+      }
+
+      function onDeviceOrientation(e) {
+        if (!gyroActive) return;
+        var beta = e.beta;   // -180..180 front-back
+        var gamma = e.gamma; // -90..90 left-right
+        if (beta == null || gamma == null) return;
+        // gamma: left/right, beta: front/back — map gently into light dir
+        lightTX = Math.max(-1, Math.min(1, gamma / 40));
+        lightTY = Math.max(-1, Math.min(1, (45 - beta) / 40));
+      }
+
+      function attachGyroListener() {
+        if (gyroListening) return;
+        window.addEventListener("deviceorientation", onDeviceOrientation, true);
+        gyroListening = true;
+      }
+
+      async function enableGyroFromGesture() {
+        try {
+          if (typeof DeviceOrientationEvent !== "undefined" &&
+              typeof DeviceOrientationEvent.requestPermission === "function") {
+            var res = await DeviceOrientationEvent.requestPermission();
+            if (res !== "granted") {
+              bootGyroBtn.textContent = "Inclinación no disponible";
+              bootGyroBtn.disabled = true;
+              gyroActive = false;
+              return;
+            }
+          }
+          attachGyroListener();
+          gyroActive = true;
+          bootGyroBtn.textContent = "Inclinación activa";
+          bootGyroBtn.classList.add("is-on");
+          bootGyroBtn.disabled = true;
+        } catch (err) {
+          gyroActive = false;
+          bootGyroBtn.textContent = "Inclinación no disponible";
+          bootGyroBtn.disabled = true;
+        }
+      }
+
+      async function runMetalGyroEnter(ctx, canvas, host, thenHash) {
+        metalEntering = true;
+        stopMetalIdle();
+        var steps = 32; // ~800ms at 25ms
+        for (var i = 0; i <= steps; i++) {
+          var p = i / steps;
+          var e = easeOut(p);
+          // 0..0.55 brightness toward white; 0.4..1 soft dissolve/blur
+          var br = clamp01(e / 0.72);
+          var bl = p < 0.4 ? 0 : (p - 0.4) / 0.6;
+          var al = p < 0.45 ? 1 : 1 - (p - 0.45) / 0.55;
+          drawMetalLogo(ctx, canvas, host, br, bl * 0.9, clamp01(al));
+          await wait(25);
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        metalEntering = false;
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+        if (host === bootHit) {
+          // restore idle metal on home when returning later; for now after enter we are on hub
+        }
+      }
+
       async function whiteGate(thenHash) {
         fx.classList.add("is-on");
         layer.style.opacity = "0";
@@ -398,7 +656,10 @@ Para consultas sobre derechos: contactar al autor.</p>
 
       async function runBoot(kind, ctx, canvas, host, thenHash) {
         var start = 0.42;
-        if (kind === "asciiMorph") {
+        if (kind === "metalGyro") {
+          await runMetalGyroEnter(ctx, canvas, host, thenHash);
+          return;
+        } else if (kind === "asciiMorph") {
           var steps = 30; // ~750ms at 25ms
           for (var i = 0; i <= steps; i++) {
             drawAsciiMorph(ctx, canvas, host, i / steps);
@@ -477,7 +738,10 @@ Para consultas sobre derechos: contactar al autor.</p>
           document.getElementById("boot-result-body").textContent =
             "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
         }
-        if (host === bootHit) drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        if (host === bootHit) {
+          if (defaultBoot === "metalGyro") startMetalIdle();
+          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        }
       }
 
       async function bootOpen() {
@@ -495,7 +759,8 @@ Para consultas sobre derechos: contactar al autor.</p>
         busy = true;
         document.getElementById("stage-hint").textContent = pendingLabel + "…";
         try {
-          drawSolid(stageCtx, stageCanvas, stageWrap, 0.42, 0, 0, 1);
+          if (pendingBoot === "metalGyro") drawMetalLogo(stageCtx, stageCanvas, stageWrap, 0, 0, 1);
+          else drawSolid(stageCtx, stageCanvas, stageWrap, 0.42, 0, 0, 1);
           await wait(120);
           await runBoot(pendingBoot, stageCtx, stageCanvas, stageWrap, "boot-result");
         } finally {
@@ -519,13 +784,17 @@ Para consultas sobre derechos: contactar al autor.</p>
           location.hash = toId;
           syncActive(toId);
           skipHash = false;
-          if (toId === "home") drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          if (toId === "home") {
+            if (defaultBoot === "metalGyro") startMetalIdle();
+            else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          }
           if (toId === "boot-stage") runStageBoot();
           return;
         }
 
         busy = true;
         try {
+          if (from && from.id === "home") stopMetalIdle();
           fx.classList.add("is-on");
           layer.style.background = "#fff";
           layer.style.opacity = "0";
@@ -534,7 +803,10 @@ Para consultas sobre derechos: contactar al autor.</p>
           location.hash = toId;
           syncActive(toId);
           skipHash = false;
-          if (toId === "home") drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          if (toId === "home") {
+            if (defaultBoot === "metalGyro") startMetalIdle();
+            else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          }
           await tween(120, function (e) { layer.style.opacity = String(1 - e); });
           fx.classList.remove("is-on");
           if (toId === "boot-stage") {
@@ -575,24 +847,40 @@ Para consultas sobre derechos: contactar al autor.</p>
         var id = (location.hash || "#home").slice(1);
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
-        if (id === "home") drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        if (id === "home") {
+          if (defaultBoot === "metalGyro") startMetalIdle();
+          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        } else {
+          stopMetalIdle();
+        }
       });
 
       window.addEventListener("resize", function () {
         if (document.getElementById("home").classList.contains("is-active")) {
-          drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          metalMask = null;
+          metalMaskKey = "";
+          if (defaultBoot === "metalGyro") drawMetalLogo(bootCtx, bootCanvas, bootHit, 0, 0, 1);
+          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
         }
+      });
+
+      bootGyroBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        enableGyroFromGesture();
       });
 
       logoImg.onload = function () {
         logoReady = true;
-        drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        if (defaultBoot === "metalGyro") startMetalIdle();
+        else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
       };
       logoImg.src = "ignara-wordmark.svg";
 
       var start = (location.hash || "#home").slice(1);
       if (!document.getElementById(start)) start = "home";
       syncActive(start);
+      if (start !== "home") stopMetalIdle();
     })();
   </script>
 </body>
