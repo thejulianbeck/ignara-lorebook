@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.08</title>
+  <title>Ignara · 0.09</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -153,84 +153,61 @@
       display: block;
       pointer-events: auto;
     }
-    #fx-layer {
-      position: absolute;
-      inset: 0;
-      background: #111;
-      will-change: transform, opacity, clip-path;
-    }
-    #fx-grid {
-      position: absolute;
-      inset: 0;
-      display: none;
-      grid-template-columns: repeat(8, 1fr);
-      grid-template-rows: repeat(14, 1fr);
-    }
-    #fx-grid.on { display: grid; }
-    #fx-grid i {
-      background: #111;
-      opacity: 0;
-      display: block;
-    }
     #fx-canvas {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      display: none;
-      image-rendering: pixelated;
+      image-rendering: auto;
     }
-    #fx-canvas.on { display: block; }
   </style>
 </head>
 <body>
   <div id="fx" aria-hidden="true">
-    <div id="fx-layer"></div>
-    <div id="fx-grid"></div>
     <canvas id="fx-canvas"></canvas>
   </div>
   <div id="app">
     <section class="screen" id="home">
       <div class="center">
-        <a class="home-btn" href="#hub" data-nav data-fx="dither">
+        <a class="home-btn" href="#hub" data-nav data-fx="fire">
           <h1>Ignara, Lore Book</h1>
-          <span class="muted">versión 0.08</span>
+          <span class="muted">versión 0.09</span>
         </a>
       </div>
     </section>
 
     <section class="screen" id="hub">
       <div class="nav">
-        <a class="back" href="#home" data-nav data-fx="dither">← inicio</a>
+        <a class="back" href="#home" data-nav data-fx="fire">← inicio</a>
       </div>
       <h2>Archivo</h2>
-      <p class="intro">Recopilación mínima del mundo de Ignara. Seis transiciones en prueba; Dither es la referencia.</p>
+      <p class="intro">Recopilación mínima del mundo de Ignara. Transición: fire dither (suave, de abajo hacia arriba).</p>
       <div class="list">
-        <a href="#world" data-nav data-fx="dither"><span>World</span><span class="arrow">→</span></a>
-        <a href="#character-sheets" data-nav data-fx="dither"><span>Character sheets</span><span class="arrow">→</span></a>
-        <a href="#anim-tests" data-nav data-fx="dither"><span>Pruebas de animación</span><span class="arrow">→</span></a>
+        <a href="#world" data-nav data-fx="fire"><span>World</span><span class="arrow">→</span></a>
+        <a href="#character-sheets" data-nav data-fx="fire"><span>Character sheets</span><span class="arrow">→</span></a>
+        <a href="#anim-tests" data-nav data-fx="fire"><span>Pruebas de animación</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="world">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dither">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fire">← archivo</a></div>
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.08.</p>
+Marcador de posición · versión 0.09.</p>
       <span class="tag">placeholder</span>
     </section>
 
     <section class="screen" id="character-sheets">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dither">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fire">← archivo</a></div>
       <h2>Character sheets</h2>
       <div class="list" style="margin-bottom: 1.5rem;">
-        <a href="#sam" data-nav data-fx="dither"><span>Sam</span><span class="arrow">→</span></a>
+        <a href="#sam" data-nav data-fx="fire"><span>Sam</span><span class="arrow">→</span></a>
       </div>
     </section>
 
     <section class="screen" id="sam">
-      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="dither">← character sheets</a></div>
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fire">← character sheets</a></div>
       <h2>Sam</h2>
       <p class="body">Prueba — Sam.
 
@@ -239,37 +216,44 @@ El texto canónico lo escribe Julián.</p>
     </section>
 
     <section class="screen" id="anim-tests">
-      <div class="nav"><a class="back" href="#hub" data-nav data-fx="dither">← archivo</a></div>
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fire">← archivo</a></div>
       <h2>Pruebas de animación</h2>
-      <p class="intro">Seis opciones. La 1 es Dither (la que te gustó). Las otras cinco buscan un corte más editorial / Awwwards, siempre mono.</p>
+      <p class="intro">Solo una transición: dither de fuego delicado, naciendo abajo y subiendo, con azul, naranja y rojo.</p>
       <div class="list">
-        <a href="#anim-result" data-nav data-fx="dither" data-label="Dither"><span>1 · Dither</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="wipe" data-label="Soft wipe"><span>2 · Soft wipe</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="mosaic" data-label="Mosaic"><span>3 · Mosaic</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="film" data-label="Film cut"><span>4 · Film cut</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="iris" data-label="Iris"><span>5 · Iris</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="drift" data-label="Drift"><span>6 · Drift</span><span class="arrow">→</span></a>
+        <a href="#anim-result" data-nav data-fx="fire" data-label="Fire dither">
+          <span>1 · Fire dither</span>
+          <span class="arrow">→</span>
+        </a>
       </div>
     </section>
 
     <section class="screen" id="anim-result">
-      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="dither">← pruebas</a></div>
-      <h2 id="result-title">Transición</h2>
-      <p class="body" id="result-body">Acabas de ver la transición.</p>
-      <span class="tag" id="result-tag">demo</span>
+      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="fire">← pruebas</a></div>
+      <h2 id="result-title">Fire dither</h2>
+      <p class="body" id="result-body">Eso fue el fire dither: grano fino, llamas de abajo hacia arriba.</p>
+      <span class="tag">demo</span>
     </section>
   </div>
   <script>
     (function () {
       var fx = document.getElementById("fx");
-      var layer = document.getElementById("fx-layer");
-      var grid = document.getElementById("fx-grid");
       var canvas = document.getElementById("fx-canvas");
       var ctx = canvas.getContext("2d");
       var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
       var busy = false;
       var skipHash = false;
-      var lastLabel = "Transición";
+
+      // Bayer 8x8 — dither delicado
+      var BAYER = [
+        [0,32,8,40,2,34,10,42],
+        [48,16,56,24,50,18,58,26],
+        [12,44,4,36,14,46,6,38],
+        [60,28,52,20,62,30,54,22],
+        [3,35,11,43,1,33,9,41],
+        [51,19,59,27,49,17,57,25],
+        [15,47,7,39,13,45,5,37],
+        [63,31,55,23,61,29,53,21]
+      ];
 
       function syncActive(id) {
         screens.forEach(function (el) {
@@ -278,47 +262,8 @@ El texto canónico lo escribe Julián.</p>
         window.scrollTo(0, 0);
       }
 
-      function fillResult(label) {
-        lastLabel = label || "Transición";
-        document.getElementById("result-title").textContent = lastLabel;
-        document.getElementById("result-body").textContent =
-          "Acabas de ver \"" + lastLabel + "\". Vuelve a pruebas si quieres comparar.";
-        document.getElementById("result-tag").textContent = "demo";
-      }
-
-      function easeInOut(p) {
-        return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
-      }
-
-      function tween(ms, apply) {
-        return new Promise(function (resolve) {
-          var t0 = null;
-          function frame(now) {
-            if (t0 === null) t0 = now;
-            var p = Math.min(1, (now - t0) / ms);
-            apply(easeInOut(p), p);
-            if (p < 1) requestAnimationFrame(frame);
-            else resolve();
-          }
-          requestAnimationFrame(frame);
-        });
-      }
-
       function wait(ms) {
         return new Promise(function (r) { setTimeout(r, ms); });
-      }
-
-      function resetFx() {
-        fx.classList.remove("is-on");
-        grid.classList.remove("on");
-        canvas.classList.remove("on");
-        grid.innerHTML = "";
-        layer.style.cssText = "";
-        layer.style.background = "#111";
-        layer.style.opacity = "1";
-        layer.style.transform = "none";
-        layer.style.clipPath = "none";
-        fx.style.opacity = "1";
       }
 
       function sizeCanvas() {
@@ -330,144 +275,99 @@ El texto canónico lo escribe Julián.</p>
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
-      async function runDither(midFn) {
-        fx.classList.add("is-on");
-        canvas.classList.add("on");
-        sizeCanvas();
+      function fireColor(t) {
+        // t 0 = base (azul intenso) → 1 = punta (rojo / negro)
+        if (t < 0.18) {
+          var u = t / 0.18;
+          return [
+            Math.round(40 + u * 80),
+            Math.round(60 + u * 100),
+            Math.round(200 + u * 55)
+          ];
+        }
+        if (t < 0.4) {
+          var u2 = (t - 0.18) / 0.22;
+          return [
+            Math.round(120 + u2 * 135),
+            Math.round(160 + u2 * 70),
+            Math.round(255 - u2 * 200)
+          ];
+        }
+        if (t < 0.7) {
+          var u3 = (t - 0.4) / 0.3;
+          return [
+            255,
+            Math.round(230 - u3 * 140),
+            Math.round(55 - u3 * 40)
+          ];
+        }
+        var u4 = (t - 0.7) / 0.3;
+        return [
+          Math.round(255 - u4 * 40),
+          Math.round(90 - u4 * 70),
+          Math.round(15 + u4 * 10)
+        ];
+      }
+
+      function drawFireFrame(progress, covering) {
         var w = window.innerWidth;
         var h = window.innerHeight;
-        var cell = 7;
+        var cell = 3;
         var cols = Math.ceil(w / cell);
         var rows = Math.ceil(h / cell);
-        var order = [];
+        ctx.clearRect(0, 0, w, h);
+
+        // Front of the fire rises from bottom to top
+        var front = covering ? progress : 1 - progress;
         for (var y = 0; y < rows; y++) {
-          for (var x = 0; x < cols; x++) order.push([x, y]);
-        }
-        for (var i = order.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var t = order[i]; order[i] = order[j]; order[j] = t;
-        }
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, w, h);
-        var steps = 18;
-        var per = Math.ceil(order.length / steps);
-        for (var s = 0; s < steps; s++) {
-          ctx.fillStyle = "#111";
-          for (var k = s * per; k < Math.min(order.length, (s + 1) * per); k++) {
-            var p = order[k];
-            ctx.fillRect(p[0] * cell, p[1] * cell, cell, cell);
+          var fromBottom = 1 - (y + 0.5) / rows;
+          // soft band around the rising front
+          var dist = fromBottom - front;
+          var heat = 1 - Math.min(1, Math.max(0, dist / 0.22 + 0.15));
+          if (!covering) {
+            // when revealing, burn away from bottom again
+            heat = Math.min(1, Math.max(0, (front - fromBottom) / 0.22 + 0.2));
+            if (fromBottom > front + 0.05) heat = 0;
+            if (fromBottom < front - 0.25) heat = covering ? 1 : 0;
+          } else {
+            if (fromBottom < front - 0.28) heat = 1;
+            if (fromBottom > front + 0.08) heat = 0;
           }
-          await wait(28);
-        }
-        midFn();
-        for (var s2 = 0; s2 < steps; s2++) {
-          ctx.fillStyle = "#fff";
-          for (var k2 = s2 * per; k2 < Math.min(order.length, (s2 + 1) * per); k2++) {
-            var p2 = order[k2];
-            ctx.fillRect(p2[0] * cell, p2[1] * cell, cell, cell);
+
+          if (heat <= 0.001) continue;
+          var rgb = fireColor(1 - fromBottom * 0.85);
+          for (var x = 0; x < cols; x++) {
+            var thresh = (BAYER[y & 7][x & 7] + 0.5) / 64;
+            // flicker
+            var flicker = ((Math.sin((x * 0.37) + (y * 0.19) + progress * 9) + 1) * 0.5) * 0.08;
+            var local = heat * (0.92 + flicker);
+            if (local > thresh * 0.92) {
+              var a = Math.min(1, 0.35 + local * 0.75);
+              ctx.fillStyle = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a + ")";
+              ctx.fillRect(x * cell, y * cell, cell, cell);
+            }
           }
-          await wait(28);
         }
       }
 
-      async function runWipe(midFn) {
+      async function runFire(midFn) {
         fx.classList.add("is-on");
-        layer.style.background = "#111";
-        layer.style.transformOrigin = "left center";
-        await tween(520, function (e) {
-          layer.style.transform = "scaleX(" + e + ")";
-        });
-        midFn();
-        layer.style.transformOrigin = "right center";
-        await tween(520, function (e) {
-          layer.style.transform = "scaleX(" + (1 - e) + ")";
-        });
-      }
-
-      async function runMosaic(midFn) {
-        fx.classList.add("is-on");
-        grid.classList.add("on");
-        var cells = 8 * 14;
-        for (var n = 0; n < cells; n++) {
-          grid.appendChild(document.createElement("i"));
-        }
-        var nodes = Array.prototype.slice.call(grid.children);
-        var idx = nodes.map(function (_, i) { return i; });
-        for (var i = idx.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp;
-        }
-        var chunk = Math.ceil(nodes.length / 16);
-        for (var c = 0; c < 16; c++) {
-          for (var a = c * chunk; a < Math.min(nodes.length, (c + 1) * chunk); a++) {
-            nodes[idx[a]].style.opacity = "1";
-          }
-          await wait(32);
+        sizeCanvas();
+        var steps = 36;
+        for (var i = 0; i <= steps; i++) {
+          drawFireFrame(i / steps, true);
+          await wait(22);
         }
         midFn();
-        for (var c2 = 0; c2 < 16; c2++) {
-          for (var b = c2 * chunk; b < Math.min(nodes.length, (c2 + 1) * chunk); b++) {
-            nodes[idx[b]].style.opacity = "0";
-          }
-          await wait(32);
+        for (var j = 0; j <= steps; j++) {
+          drawFireFrame(j / steps, false);
+          await wait(22);
         }
+        fx.classList.remove("is-on");
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       }
 
-      async function runFilm(midFn) {
-        fx.classList.add("is-on");
-        layer.style.background = "#111";
-        layer.style.opacity = "0";
-        await tween(180, function (e) { layer.style.opacity = String(e); });
-        await wait(220);
-        midFn();
-        await wait(120);
-        await tween(260, function (e) { layer.style.opacity = String(1 - e); });
-      }
-
-      async function runIris(midFn) {
-        fx.classList.add("is-on");
-        layer.style.background = "#111";
-        await tween(560, function (e) {
-          var r = e * 150;
-          layer.style.clipPath = "circle(" + r + "% at 50% 50%)";
-        });
-        midFn();
-        await tween(560, function (e) {
-          var r = (1 - e) * 150;
-          layer.style.clipPath = "circle(" + r + "% at 50% 50%)";
-        });
-      }
-
-      async function runDrift(midFn) {
-        fx.classList.add("is-on");
-        layer.style.background = "#111";
-        layer.style.transform = "translateY(100%)";
-        await tween(580, function (e) {
-          layer.style.transform = "translateY(" + ((1 - e) * 100) + "%)";
-        });
-        midFn();
-        await tween(580, function (e) {
-          layer.style.transform = "translateY(" + (-e * 100) + "%)";
-        });
-      }
-
-      var runners = {
-        dither: runDither,
-        wipe: runWipe,
-        mosaic: runMosaic,
-        film: runFilm,
-        iris: runIris,
-        drift: runDrift
-      };
-
-      async function curtain(name, midFn) {
-        resetFx();
-        var run = runners[name] || runDither;
-        await run(midFn);
-        resetFx();
-      }
-
-      async function go(toId, name, label) {
+      async function go(toId) {
         if (busy) return;
         var to = document.getElementById(toId);
         if (!to) return;
@@ -475,10 +375,7 @@ El texto canónico lo escribe Julián.</p>
           document.querySelector(".screen.is-active") ||
           document.querySelector(".screen:target") ||
           document.getElementById("home");
-        if (from && from.id === toId && toId !== "anim-result") return;
-
-        name = name || "dither";
-        if (toId === "anim-result") fillResult(label);
+        if (from && from.id === toId) return;
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           skipHash = true;
@@ -490,7 +387,7 @@ El texto canónico lo escribe Julián.</p>
 
         busy = true;
         try {
-          await curtain(name, function () {
+          await runFire(function () {
             skipHash = true;
             location.hash = toId;
             syncActive(toId);
@@ -506,7 +403,7 @@ El texto canónico lo escribe Julián.</p>
           var href = el.getAttribute("href") || "";
           if (href.charAt(0) !== "#") return;
           e.preventDefault();
-          go(href.slice(1), el.getAttribute("data-fx") || "dither", el.getAttribute("data-label") || "");
+          go(href.slice(1));
         });
       });
 
@@ -515,7 +412,6 @@ El texto canónico lo escribe Julián.</p>
         var id = (location.hash || "#home").slice(1);
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
-        if (id === "anim-result") fillResult(lastLabel);
       });
 
       var start = (location.hash || "#home").slice(1);
