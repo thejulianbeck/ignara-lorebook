@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.09</title>
+  <title>Ignara · 0.10</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -171,7 +171,7 @@
       <div class="center">
         <a class="home-btn" href="#hub" data-nav data-fx="fire">
           <h1>Ignara, Lore Book</h1>
-          <span class="muted">versión 0.09</span>
+          <span class="muted">versión 0.10</span>
         </a>
       </div>
     </section>
@@ -181,7 +181,7 @@
         <a class="back" href="#home" data-nav data-fx="fire">← inicio</a>
       </div>
       <h2>Archivo</h2>
-      <p class="intro">Recopilación mínima del mundo de Ignara. Transición: fire dither (suave, de abajo hacia arriba).</p>
+      <p class="intro">Recopilación mínima del mundo de Ignara. Transición: fire dither en wipe (llena de abajo arriba, se recoge igual; todo dither).</p>
       <div class="list">
         <a href="#world" data-nav data-fx="fire"><span>World</span><span class="arrow">→</span></a>
         <a href="#character-sheets" data-nav data-fx="fire"><span>Character sheets</span><span class="arrow">→</span></a>
@@ -194,7 +194,7 @@
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.09.</p>
+Marcador de posición · versión 0.10.</p>
       <span class="tag">placeholder</span>
     </section>
 
@@ -218,7 +218,7 @@ El texto canónico lo escribe Julián.</p>
     <section class="screen" id="anim-tests">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fire">← archivo</a></div>
       <h2>Pruebas de animación</h2>
-      <p class="intro">Solo una transición: dither de fuego delicado, naciendo abajo y subiendo, con azul, naranja y rojo.</p>
+      <p class="intro">Solo una transición: wipe de fuego en dither (abajo→arriba y se recoge abajo→arriba), llamas grandes, azul/naranja/rojo.</p>
       <div class="list">
         <a href="#anim-result" data-nav data-fx="fire" data-label="Fire dither">
           <span>1 · Fire dither</span>
@@ -230,7 +230,7 @@ El texto canónico lo escribe Julián.</p>
     <section class="screen" id="anim-result">
       <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="fire">← pruebas</a></div>
       <h2 id="result-title">Fire dither</h2>
-      <p class="body" id="result-body">Eso fue el fire dither: grano fino, llamas de abajo hacia arriba.</p>
+      <p class="body" id="result-body">Eso fue el fire dither: wipe completo en dither, llamas grandes, de abajo hacia arriba.</p>
       <span class="tag">demo</span>
     </section>
   </div>
@@ -312,37 +312,49 @@ El texto canónico lo escribe Julián.</p>
       function drawFireFrame(progress, covering) {
         var w = window.innerWidth;
         var h = window.innerHeight;
-        var cell = 3;
+        var cell = 4;
         var cols = Math.ceil(w / cell);
         var rows = Math.ceil(h / cell);
         ctx.clearRect(0, 0, w, h);
 
-        // Front of the fire rises from bottom to top
-        var front = covering ? progress : 1 - progress;
+        // Wipe front: 0 at bottom → 1 at top. Cover fills below front;
+        // reveal clears from bottom up (same direction).
+        var front = progress;
         for (var y = 0; y < rows; y++) {
           var fromBottom = 1 - (y + 0.5) / rows;
-          // soft band around the rising front
-          var dist = fromBottom - front;
-          var heat = 1 - Math.min(1, Math.max(0, dist / 0.22 + 0.15));
-          if (!covering) {
-            // when revealing, burn away from bottom again
-            heat = Math.min(1, Math.max(0, (front - fromBottom) / 0.22 + 0.2));
-            if (fromBottom > front + 0.05) heat = 0;
-            if (fromBottom < front - 0.25) heat = covering ? 1 : 0;
+          var covered;
+          if (covering) {
+            covered = fromBottom <= front;
           } else {
-            if (fromBottom < front - 0.28) heat = 1;
-            if (fromBottom > front + 0.08) heat = 0;
+            // retract: still-on fire sits above the clear front
+            covered = fromBottom >= front;
           }
+          if (!covered) continue;
 
-          if (heat <= 0.001) continue;
-          var rgb = fireColor(1 - fromBottom * 0.85);
+          // Bigger flame tongues (large-scale noise)
+          var tongue =
+            0.55 +
+            0.28 * Math.sin(fromBottom * 7.2 + progress * 4.5) +
+            0.22 * Math.sin(fromBottom * 3.1 - progress * 2.8);
+          var rgb = fireColor(Math.min(1, Math.max(0, 1 - fromBottom * tongue)));
+
           for (var x = 0; x < cols; x++) {
+            var nx = x / cols;
+            var flame =
+              0.5 +
+              0.35 * Math.sin(nx * 11.0 + fromBottom * 9.0 + progress * 6.0) +
+              0.25 * Math.sin(nx * 5.5 - fromBottom * 4.0 + progress * 3.2) +
+              0.15 * Math.sin((nx + fromBottom) * 17.0 + progress * 8.0);
+            flame = Math.min(1, Math.max(0.2, flame));
+
+            // Soft edge only near the wipe front; interior stays fully dithered
+            var edge = Math.abs(fromBottom - front);
+            var density = edge < 0.1 ? 0.55 + (1 - edge / 0.1) * 0.45 : 1;
+
             var thresh = (BAYER[y & 7][x & 7] + 0.5) / 64;
-            // flicker
-            var flicker = ((Math.sin((x * 0.37) + (y * 0.19) + progress * 9) + 1) * 0.5) * 0.08;
-            var local = heat * (0.92 + flicker);
-            if (local > thresh * 0.92) {
-              var a = Math.min(1, 0.35 + local * 0.75);
+            var local = density * flame;
+            if (local > thresh * 0.85) {
+              var a = Math.min(1, 0.55 + local * 0.45);
               ctx.fillStyle = "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a + ")";
               ctx.fillRect(x * cell, y * cell, cell, cell);
             }
@@ -353,15 +365,15 @@ El texto canónico lo escribe Julián.</p>
       async function runFire(midFn) {
         fx.classList.add("is-on");
         sizeCanvas();
-        var steps = 36;
+        var steps = 40;
         for (var i = 0; i <= steps; i++) {
           drawFireFrame(i / steps, true);
-          await wait(22);
+          await wait(24);
         }
         midFn();
         for (var j = 0; j <= steps; j++) {
           drawFireFrame(j / steps, false);
-          await wait(22);
+          await wait(24);
         }
         fx.classList.remove("is-on");
         ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
