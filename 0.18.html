@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Ignara · 0.18</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --fg: #111; --muted: #666; --line: #e8e8e8;
+      --pad: max(1.25rem, env(safe-area-inset-left));
+      --pad-r: max(1.25rem, env(safe-area-inset-right));
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    html, body {
+      margin: 0; min-height: 100%; background: #fff; color: var(--fg);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+    }
+    body {
+      min-height: 100dvh; display: flex; justify-content: center;
+      -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+    }
+    #app {
+      position: relative; width: min(100%, 28rem); min-height: 100dvh;
+      padding: max(1.75rem, env(safe-area-inset-top)) var(--pad) max(2.25rem, env(safe-area-inset-bottom)) var(--pad-r);
+      display: flex; flex-direction: column;
+    }
+    .screen { display: none; flex: 1; flex-direction: column; }
+    .screen:target { display: flex; }
+    html:not(:has(.screen:target)) #home { display: flex; }
+    .screen.is-active { display: flex; }
+    html:has(.screen:target) .screen.is-active:not(:target) { display: none; }
+    .center {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; gap: 1rem;
+    }
+    h1, h2, p { margin: 0; font-weight: 400; }
+    h2 { font-size: 1rem; letter-spacing: 0.04em; margin-bottom: 1.15rem; }
+    .muted { color: var(--muted); font-size: 0.875rem; letter-spacing: 0.02em; }
+    .intro { color: var(--muted); margin: 0 0 1.85rem; max-width: 38ch; font-size: 0.9375rem; }
+    a {
+      color: inherit; text-decoration: none; -webkit-user-select: none; user-select: none;
+      touch-action: manipulation;
+    }
+    .back:active, .list a:active, #boot-hit:active { opacity: 0.7; }
+    .nav { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.85rem; min-height: 2.75rem; }
+    .back {
+      color: var(--muted); font-size: 0.8125rem; letter-spacing: 0.03em;
+      padding: 0.65rem 0; min-height: 2.75rem; display: inline-flex; align-items: center;
+    }
+    .list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+    .list a {
+      padding: 1.1rem 0; min-height: 3rem; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    }
+    .arrow { color: var(--muted); font-size: 0.875rem; flex-shrink: 0; }
+    .body { color: var(--fg); max-width: 38ch; white-space: pre-wrap; font-size: 0.9375rem; }
+    .tag {
+      display: inline-block; margin-top: 1.75rem; color: var(--muted);
+      font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    #boot-hit {
+      border: none; background: none; padding: 0; margin: 0;
+      width: min(72vw, 16rem); aspect-ratio: 497 / 152;
+      display: block; cursor: pointer; touch-action: manipulation;
+    }
+    #boot-canvas, #stage-canvas { width: 100%; height: 100%; display: block; }
+    #boot-gyro {
+      margin-top: 0.35rem; border: 1px solid var(--line); background: #fff;
+      color: var(--muted); font: inherit; font-size: 0.75rem; letter-spacing: 0.03em;
+      padding: 0.55rem 0.85rem; min-height: 2.5rem; border-radius: 0;
+      cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    #boot-gyro:active { opacity: 0.7; }
+    #boot-gyro.is-on { color: var(--fg); border-color: #ccc; }
+    #boot-gyro[hidden] { display: none; }
+    #stage-wrap {
+      width: min(72vw, 16rem); aspect-ratio: 497 / 152; margin: 2rem auto 0;
+    }
+    .tm {
+      font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em;
+      align-self: flex-end; margin: -0.35rem 0.15rem 0 0;
+    }
+    #fx {
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: none;
+    }
+    #fx.is-on { display: block; pointer-events: auto; }
+    #fx-layer { position: absolute; inset: 0; background: #fff; }
+  </style>
+</head>
+<body>
+  <div id="fx" aria-hidden="true"><div id="fx-layer"></div></div>
+  <div id="app">
+    <section class="screen" id="home">
+      <div class="center">
+        <button type="button" id="boot-hit" aria-label="Abrir Ignara">
+          <canvas id="boot-canvas" width="497" height="152"></canvas>
+        </button>
+        <span class="tm">™</span>
+        <span class="muted">versión 0.18 · tocar para entrar</span>
+        <button type="button" id="boot-gyro">Activar inclinación</button>
+      </div>
+    </section>
+
+    <section class="screen" id="hub">
+      <div class="nav"><a class="back" href="#home" data-nav data-fx="fade">← inicio</a></div>
+      <h2>Archivo</h2>
+      <p class="intro">Recopilación mínima del mundo de Ignara.</p>
+      <div class="list">
+        <a href="#world" data-nav data-fx="fade"><span>World</span><span class="arrow">→</span></a>
+        <a href="#character-sheets" data-nav data-fx="fade"><span>Character sheets</span><span class="arrow">→</span></a>
+        <a href="#boot-tests" data-nav data-fx="fade"><span>Pruebas de portada</span><span class="arrow">→</span></a>
+        <a href="#propiedad" data-nav data-fx="fade"><span>Propiedad</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="world">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>World</h2>
+      <p class="body">Prueba — World.
+
+Marcador de posición · versión 0.18.</p>
+      <span class="tag">placeholder</span>
+    </section>
+
+    <section class="screen" id="character-sheets">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Character sheets</h2>
+      <div class="list" style="margin-bottom: 1.5rem;">
+        <a href="#sam" data-nav data-fx="fade"><span>Sam</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="sam">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Sam</h2>
+      <p class="body">Prueba — Sam.
+
+El texto canónico lo escribe Julián.</p>
+      <span class="tag">placeholder</span>
+    </section>
+
+    <section class="screen" id="boot-tests">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Pruebas de portada</h2>
+      <p class="intro">Once entradas del wordmark (la principal ahora es metalGyro: metal + giroscopio, ~0.8s, sin zoom). Tocá una para probar.</p>
+      <div class="list">
+        <a href="#boot-stage" data-boot="metalGyro" data-label="Metal gyro"><span>1 · Metal gyro</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>2 · ASCII morph</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>3 · Zoom dither</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>4 · Soft fade</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>5 · Punch</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>6 · Rise</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>7 · Snap flash</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>8 · Sink</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>9 · Slices</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>10 · Bloom</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>11 · Hard cut</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="boot-stage">
+      <div class="nav"><a class="back" href="#boot-tests" data-nav data-fx="fade">← pruebas</a></div>
+      <p class="muted" id="stage-hint" style="text-align:center;">Preparando…</p>
+      <div id="stage-wrap"><canvas id="stage-canvas" width="497" height="152"></canvas></div>
+    </section>
+
+    <section class="screen" id="boot-result">
+      <div class="nav"><a class="back" href="#boot-tests" data-nav data-fx="fade">← pruebas</a></div>
+      <h2 id="boot-result-title">Portada</h2>
+      <p class="body" id="boot-result-body">Acabas de ver la animación de entrada.</p>
+      <span class="tag">demo portada</span>
+    </section>
+
+    <section class="screen" id="propiedad">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Propiedad</h2>
+      <p class="body">Aviso de autoría y uso
+
+Ignara™, Ignara Lore Book y los textos, nombres, conceptos, wordmark y materiales publicados en este sitio son obra original de Julián, autor de la trilogía Ignara.
+
+© 2026 Julián. Todos los derechos reservados.
+
+Queda prohibida la reproducción, distribución, modificación o uso comercial de estos materiales sin autorización previa y por escrito del autor.
+
+Ignara™ y el wordmark asociados están protegidos como signos distintivos de la obra y su autor.
+
+Primera publicación pública de este lorebook: 2026, en https://thejulianbeck.github.io/ignara-lorebook/
+
+Para consultas sobre derechos: contactar al autor.</p>
+      <span class="tag">© · Ignara™</span>
+    </section>
+  </div>
+  <script>
+    (function () {
+      var fx = document.getElementById("fx");
+      var layer = document.getElementById("fx-layer");
+      var bootHit = document.getElementById("boot-hit");
+      var bootCanvas = document.getElementById("boot-canvas");
+      var bootCtx = bootCanvas.getContext("2d");
+      var stageCanvas = document.getElementById("stage-canvas");
+      var stageCtx = stageCanvas.getContext("2d");
+      var stageWrap = document.getElementById("stage-wrap");
+      var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
+      var busy = false;
+      var skipHash = false;
+      var logoImg = new Image();
+      var logoReady = false;
+      var pendingBoot = "metalGyro";
+      var pendingLabel = "Metal gyro";
+      var defaultBoot = "metalGyro";
+      var bootGyroBtn = document.getElementById("boot-gyro");
+      var metalIdleOn = false;
+      var metalRaf = 0;
+      var metalMask = null;
+      var metalMaskKey = "";
+      var lightTX = 0.35, lightTY = -0.45;
+      var lightX = 0.35, lightY = -0.45;
+      var gyroActive = false;
+      var gyroListening = false;
+      var metalEntering = false;
+      var metalBright = 0;
+      var metalBlur = 0;
+      var metalAlpha = 1;
+
+      var BAYER = [
+        [0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],
+        [12,44,4,36,14,46,6,38],[60,28,52,20,62,30,54,22],
+        [3,35,11,43,1,33,9,41],[51,19,59,27,49,17,57,25],
+        [15,47,7,39,13,45,5,37],[63,31,55,23,61,29,53,21]
+      ];
+
+      function syncActive(id) {
+        screens.forEach(function (el) {
+          el.classList.toggle("is-active", el.id === id);
+        });
+        window.scrollTo(0, 0);
+      }
+
+      function wait(ms) {
+        return new Promise(function (r) { setTimeout(r, ms); });
+      }
+
+      function easeOut(p) { return 1 - Math.pow(1 - p, 3); }
+
+      function tween(ms, apply) {
+        return new Promise(function (resolve) {
+          var t0 = null;
+          function frame(now) {
+            if (t0 === null) t0 = now;
+            var p = Math.min(1, (now - t0) / ms);
+            apply(easeOut(p), p);
+            if (p < 1) requestAnimationFrame(frame);
+            else resolve();
+          }
+          requestAnimationFrame(frame);
+        });
+      }
+
+      function sizeCanvas(canvas, ctx, host) {
+        var rect = host.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { w: rect.width, h: rect.height, dpr: dpr };
+      }
+
+      function drawSolid(ctx, canvas, host, scale, ox, oy, alpha) {
+        if (!logoReady) return;
+        ox = ox || 0; oy = oy || 0; alpha = alpha == null ? 1 : alpha;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        ctx.globalAlpha = alpha;
+        var lw = size.w * scale;
+        var lh = size.h * scale;
+        var x = (size.w - lw) / 2 + ox * size.w;
+        var y = (size.h - lh) / 2 + oy * size.h;
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(logoImg, x, y, lw, lh);
+        ctx.globalAlpha = 1;
+      }
+
+      function drawDither(ctx, canvas, host, scale, dissolve, ox, oy) {
+        if (!logoReady) return;
+        ox = ox || 0; oy = oy || 0;
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
+        var off = document.createElement("canvas");
+        off.width = canvas.width; off.height = canvas.height;
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, size.w, size.h);
+        var lw = size.w * scale;
+        var lh = size.h * scale;
+        var x = (size.w - lw) / 2 + ox * size.w;
+        var y = (size.h - lh) / 2 + oy * size.h;
+        octx.drawImage(logoImg, x, y, lw, lh);
+        var img = octx.getImageData(0, 0, off.width, off.height);
+        var data = img.data;
+        for (var py = 0; py < off.height; py++) {
+          for (var px = 0; px < off.width; px++) {
+            var i = (py * off.width + px) * 4;
+            if (data[i + 3] < 8) continue;
+            var thresh = (BAYER[py & 7][px & 7] + 0.5) / 64;
+            if (dissolve > thresh) data[i + 3] = 0;
+            else { data[i] = data[i+1] = data[i+2] = 0; data[i+3] = 255; }
+          }
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(img, 0, 0);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawSlices(ctx, canvas, host, scale, progress) {
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        var bands = 10;
+        var lh = size.h * scale;
+        var lw = size.w * scale;
+        var x = (size.w - lw) / 2;
+        var y = (size.h - lh) / 2;
+        for (var b = 0; b < bands; b++) {
+          var local = Math.min(1, Math.max(0, (progress - b * 0.06) / 0.35));
+          if (local <= 0) continue;
+          var sy = (b / bands) * logoImg.height;
+          var sh = logoImg.height / bands;
+          var dy = y + (b / bands) * lh;
+          var dh = lh / bands;
+          var slide = (1 - local) * (b % 2 === 0 ? -40 : 40);
+          ctx.globalAlpha = local;
+          ctx.drawImage(logoImg, 0, sy, logoImg.width, sh, x + slide, dy, lw, dh);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+
+      function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+
+      function buildMetalMask(cssW, cssH, dpr) {
+        var key = Math.round(cssW) + "x" + Math.round(cssH) + "@" + dpr.toFixed(2);
+        if (metalMask && metalMaskKey === key) return metalMask;
+        var scale = 0.72;
+        var lw = cssW * scale, lh = cssH * scale;
+        var x0 = (cssW - lw) / 2, y0 = (cssH - lh) / 2;
+        var pw = Math.max(1, Math.floor(cssW * dpr));
+        var ph = Math.max(1, Math.floor(cssH * dpr));
+        var off = document.createElement("canvas");
+        off.width = pw; off.height = ph;
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, cssW, cssH);
+        octx.drawImage(logoImg, x0, y0, lw, lh);
+        var img = octx.getImageData(0, 0, pw, ph);
+        var data = img.data;
+        var n = pw * ph;
+        var alpha = new Float32Array(n);
+        var edge = new Float32Array(n);
+        var nx = new Float32Array(n);
+        var ny = new Float32Array(n);
+        var nz = new Float32Array(n);
+        var INF = 1e6;
+        var i, x, y;
+        for (i = 0; i < n; i++) {
+          alpha[i] = data[i * 4 + 3] / 255;
+          edge[i] = alpha[i] > 0.06 ? INF : 0;
+        }
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) { edge[i] = 0; continue; }
+            var best = edge[i];
+            if (x > 0) best = Math.min(best, edge[i - 1] + 1);
+            if (y > 0) best = Math.min(best, edge[i - pw] + 1);
+            if (x > 0 && y > 0) best = Math.min(best, edge[i - pw - 1] + 1.414);
+            if (x + 1 < pw && y > 0) best = Math.min(best, edge[i - pw + 1] + 1.414);
+            edge[i] = best;
+          }
+        }
+        for (y = ph - 1; y >= 0; y--) {
+          for (x = pw - 1; x >= 0; x--) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) { edge[i] = 0; continue; }
+            var best2 = edge[i];
+            if (x + 1 < pw) best2 = Math.min(best2, edge[i + 1] + 1);
+            if (y + 1 < ph) best2 = Math.min(best2, edge[i + pw] + 1);
+            if (x + 1 < pw && y + 1 < ph) best2 = Math.min(best2, edge[i + pw + 1] + 1.414);
+            if (x > 0 && y + 1 < ph) best2 = Math.min(best2, edge[i + pw - 1] + 1.414);
+            edge[i] = best2;
+          }
+        }
+        for (y = 1; y < ph - 1; y++) {
+          for (x = 1; x < pw - 1; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) continue;
+            var gx = edge[i + 1] - edge[i - 1];
+            var gy = edge[i + pw] - edge[i - pw];
+            var bx = -gx, by = -gy, bz = 2.6;
+            var len = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
+            nx[i] = bx / len;
+            ny[i] = by / len;
+            nz[i] = bz / len;
+          }
+        }
+        metalMask = { pw: pw, ph: ph, alpha: alpha, edge: edge, nx: nx, ny: ny, nz: nz };
+        metalMaskKey = key;
+        return metalMask;
+      }
+
+      function drawMetalLogo(ctx, canvas, host, bright, blurAmt, alphaMul) {
+        if (!logoReady) return;
+        bright = bright || 0;
+        blurAmt = blurAmt || 0;
+        alphaMul = alphaMul == null ? 1 : alphaMul;
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
+        var mask = buildMetalMask(size.w, size.h, dpr);
+        var pw = mask.pw, ph = mask.ph;
+        var out = ctx.createImageData(pw, ph);
+        var od = out.data;
+        var lx = lightX, ly = lightY, lz = 0.85;
+        var llen = Math.sqrt(lx * lx + ly * ly + lz * lz) || 1;
+        lx /= llen; ly /= llen; lz /= llen;
+        var hx = lx, hy = ly, hz = lz + 1;
+        var hlen = Math.sqrt(hx * hx + hy * hy + hz * hz) || 1;
+        hx /= hlen; hy /= hlen; hz /= hlen;
+        var bevelR = 5.5 * dpr;
+        var i, x, y, a, ndot, shade, spec, g, edgeF, v;
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            a = mask.alpha[i];
+            if (a < 0.06) continue;
+            var nnx = mask.nx[i], nny = mask.ny[i], nnz = mask.nz[i] || 1;
+            ndot = nnx * lx + nny * ly + nnz * lz;
+            ndot = clamp01(ndot);
+            edgeF = clamp01(mask.edge[i] / bevelR);
+            // Soft bevel: brighter near rim when facing light
+            shade = 0.28 + 0.42 * ndot + 0.18 * (1 - edgeF) * ndot;
+            var nh = nnx * hx + nny * hy + nnz * hz;
+            nh = clamp01(nh);
+            spec = Math.pow(nh, 28) * 0.85 + Math.pow(nh, 8) * 0.22;
+            g = shade * 210 + spec * 255;
+            g = g * (1 - bright) + 255 * bright;
+            g = Math.max(0, Math.min(255, g));
+            v = i * 4;
+            od[v] = od[v + 1] = od[v + 2] = g;
+            od[v + 3] = Math.round(a * alphaMul * 255);
+          }
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (blurAmt > 0.01) {
+          var tmp = document.createElement("canvas");
+          tmp.width = pw; tmp.height = ph;
+          var tctx = tmp.getContext("2d");
+          tctx.putImageData(out, 0, 0);
+          ctx.save();
+          ctx.globalAlpha = alphaMul;
+          ctx.filter = "blur(" + (blurAmt * 10).toFixed(2) + "px)";
+          ctx.drawImage(tmp, 0, 0);
+          ctx.filter = "none";
+          ctx.restore();
+        } else {
+          ctx.putImageData(out, 0, 0);
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function metalIdleTick(now) {
+        if (!metalIdleOn) return;
+        metalRaf = requestAnimationFrame(metalIdleTick);
+        if (metalEntering) return;
+        // Lerp light toward target
+        lightX += (lightTX - lightX) * 0.12;
+        lightY += (lightTY - lightY) * 0.12;
+        if (!gyroActive) {
+          var t = (now || performance.now()) * 0.001;
+          lightTX = Math.sin(t * 0.55) * 0.55 + Math.sin(t * 0.23) * 0.15;
+          lightTY = Math.cos(t * 0.41) * 0.4 - 0.15;
+        }
+        if (document.getElementById("home").classList.contains("is-active")) {
+          drawMetalLogo(bootCtx, bootCanvas, bootHit, 0, 0, 1);
+        }
+      }
+
+      function startMetalIdle() {
+        if (metalIdleOn) return;
+        metalIdleOn = true;
+        metalEntering = false;
+        metalBright = 0;
+        metalBlur = 0;
+        metalAlpha = 1;
+        metalRaf = requestAnimationFrame(metalIdleTick);
+      }
+
+      function stopMetalIdle() {
+        metalIdleOn = false;
+        if (metalRaf) cancelAnimationFrame(metalRaf);
+        metalRaf = 0;
+      }
+
+      function onDeviceOrientation(e) {
+        if (!gyroActive) return;
+        var beta = e.beta;   // -180..180 front-back
+        var gamma = e.gamma; // -90..90 left-right
+        if (beta == null || gamma == null) return;
+        // gamma: left/right, beta: front/back — map gently into light dir
+        lightTX = Math.max(-1, Math.min(1, gamma / 40));
+        lightTY = Math.max(-1, Math.min(1, (45 - beta) / 40));
+      }
+
+      function attachGyroListener() {
+        if (gyroListening) return;
+        window.addEventListener("deviceorientation", onDeviceOrientation, true);
+        gyroListening = true;
+      }
+
+      async function enableGyroFromGesture() {
+        try {
+          if (typeof DeviceOrientationEvent !== "undefined" &&
+              typeof DeviceOrientationEvent.requestPermission === "function") {
+            var res = await DeviceOrientationEvent.requestPermission();
+            if (res !== "granted") {
+              bootGyroBtn.textContent = "Inclinación no disponible";
+              bootGyroBtn.disabled = true;
+              gyroActive = false;
+              return;
+            }
+          }
+          attachGyroListener();
+          gyroActive = true;
+          bootGyroBtn.textContent = "Inclinación activa";
+          bootGyroBtn.classList.add("is-on");
+          bootGyroBtn.disabled = true;
+        } catch (err) {
+          gyroActive = false;
+          bootGyroBtn.textContent = "Inclinación no disponible";
+          bootGyroBtn.disabled = true;
+        }
+      }
+
+      async function runMetalGyroEnter(ctx, canvas, host, thenHash) {
+        metalEntering = true;
+        stopMetalIdle();
+        var steps = 32; // ~800ms at 25ms
+        for (var i = 0; i <= steps; i++) {
+          var p = i / steps;
+          var e = easeOut(p);
+          // 0..0.55 brightness toward white; 0.4..1 soft dissolve/blur
+          var br = clamp01(e / 0.72);
+          var bl = p < 0.4 ? 0 : (p - 0.4) / 0.6;
+          var al = p < 0.45 ? 1 : 1 - (p - 0.45) / 0.55;
+          drawMetalLogo(ctx, canvas, host, br, bl * 0.9, clamp01(al));
+          await wait(25);
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        metalEntering = false;
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+        if (host === bootHit) {
+          // restore idle metal on home when returning later; for now after enter we are on hub
+        }
+      }
+
+      async function whiteGate(thenHash) {
+        fx.classList.add("is-on");
+        layer.style.opacity = "0";
+        await tween(90, function (e) { layer.style.opacity = String(e); });
+        skipHash = true;
+        location.hash = thenHash;
+        syncActive(thenHash);
+        skipHash = false;
+        await tween(110, function (e) { layer.style.opacity = String(1 - e); });
+        fx.classList.remove("is-on");
+        layer.style.opacity = "0";
+      }
+
+
+      function drawAsciiMorph(ctx, canvas, host, progress) {
+        // progress 0..1: center→out becomes ASCII, then center→out fades away
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        var w = size.w, h = size.h, dpr = size.dpr;
+        var scale = 0.72;
+        var lw = w * scale, lh = h * scale;
+        var x0 = (w - lw) / 2, y0 = (h - lh) / 2;
+
+        var off = document.createElement("canvas");
+        off.width = Math.max(1, Math.floor(lw * dpr));
+        off.height = Math.max(1, Math.floor(lh * dpr));
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, lw, lh);
+        octx.drawImage(logoImg, 0, 0, lw, lh);
+        var sample = octx.getImageData(0, 0, off.width, off.height).data;
+
+        ctx.clearRect(0, 0, w, h);
+        var cell = 7;
+        var cols = Math.ceil(lw / cell);
+        var rows = Math.ceil(lh / cell);
+        var cx = cols / 2, cy = rows / 2;
+        var maxR = Math.sqrt(cx * cx + cy * cy) || 1;
+        var chars = " .:-=+*#%@";
+        ctx.font = "6px IBM Plex Mono, ui-monospace, monospace";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+
+        // phase: 0-0.55 convert solid→ascii from inside; 0.55-1 ascii→gone from inside
+        var convertP = Math.min(1, progress / 0.55);
+        var fadeP = progress < 0.55 ? 0 : (progress - 0.55) / 0.45;
+
+        for (var row = 0; row < rows; row++) {
+          for (var col = 0; col < cols; col++) {
+            var px = Math.min(off.width - 1, Math.floor((col + 0.5) / cols * off.width));
+            var py = Math.min(off.height - 1, Math.floor((row + 0.5) / rows * off.height));
+            var si = (py * off.width + px) * 4;
+            if (sample[si + 3] < 40) continue;
+
+            var dx = col - cx, dy = row - cy;
+            var r = Math.sqrt(dx * dx + dy * dy) / maxR;
+            var dxCss = x0 + (col + 0.5) * cell;
+            var dyCss = y0 + (row + 0.5) * cell;
+
+            if (r > convertP + 0.04) {
+              // still solid outer ring
+              ctx.fillStyle = "#111";
+              ctx.fillRect(dxCss - cell * 0.45, dyCss - cell * 0.45, cell * 0.9, cell * 0.9);
+              continue;
+            }
+            if (r > fadeP + 0.06 || fadeP <= 0) {
+              // ASCII region
+              var bright = 1 - (sample[si] / 255);
+              var ci = Math.min(chars.length - 1, Math.floor(bright * (chars.length - 1)));
+              ctx.fillStyle = "#111";
+              ctx.fillText(chars[ci], dxCss, dyCss);
+            }
+            // else gone (inner faded)
+          }
+        }
+      }
+
+      async function runBoot(kind, ctx, canvas, host, thenHash) {
+        var start = 0.42;
+        if (kind === "metalGyro") {
+          await runMetalGyroEnter(ctx, canvas, host, thenHash);
+          return;
+        } else if (kind === "asciiMorph") {
+          var steps = 30; // ~750ms at 25ms
+          for (var i = 0; i <= steps; i++) {
+            drawAsciiMorph(ctx, canvas, host, i / steps);
+            await wait(25);
+          }
+        } else if (kind === "zoomDither") {
+          var steps = 18;
+          for (var i = 0; i <= steps; i++) {
+            var p = i / steps;
+            var e = easeOut(p);
+            var scale = start + (2.2 - start) * e;
+            var dissolve = Math.max(0, (p - 0.2) / 0.8);
+            if (p < 0.22) drawSolid(ctx, canvas, host, scale, 0, 0, 1);
+            else drawDither(ctx, canvas, host, scale, dissolve, 0, 0);
+            await wait(14);
+          }
+        } else if (kind === "softFade") {
+          await tween(280, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.55, 0, 0, 1 - e);
+          });
+        } else if (kind === "punch") {
+          await tween(160, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 1.6, 0, 0, 1 - e * 0.85);
+          });
+        } else if (kind === "rise") {
+          await tween(260, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.3, 0, 0.35 * (1 - e), 1 - e);
+          });
+        } else if (kind === "snapFlash") {
+          drawSolid(ctx, canvas, host, start, 0, 0, 1);
+          await wait(60);
+          fx.classList.add("is-on");
+          layer.style.background = "#fff";
+          layer.style.opacity = "1";
+          await wait(50);
+        } else if (kind === "sink") {
+          await tween(260, function (e) {
+            drawSolid(ctx, canvas, host, start * (1 - e * 0.7), 0, e * 0.08, 1 - e);
+          });
+        } else if (kind === "slices") {
+          for (var s = 0; s <= 16; s++) {
+            drawSlices(ctx, canvas, host, start, s / 16);
+            await wait(16);
+          }
+          await tween(120, function (e) {
+            drawSlices(ctx, canvas, host, start + e * 0.4, 1);
+            ctx.globalAlpha = 1 - e;
+          });
+          ctx.globalAlpha = 1;
+        } else if (kind === "bloom") {
+          await tween(240, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.9, 0, 0, 1 - e);
+            if (e > 0.4) {
+              fx.classList.add("is-on");
+              layer.style.opacity = String((e - 0.4) / 0.6 * 0.85);
+            }
+          });
+        } else if (kind === "hardCut") {
+          drawSolid(ctx, canvas, host, start, 0, 0, 1);
+          await wait(40);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          await wait(30);
+        } else if (kind === "drift") {
+          await tween(240, function (e) {
+            drawSolid(ctx, canvas, host, start, 0, -e * 0.55, 1 - e);
+          });
+        } else {
+          await tween(200, function (e) {
+            drawSolid(ctx, canvas, host, start + e, 0, 0, 1 - e);
+          });
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+        if (host === bootHit) {
+          if (defaultBoot === "metalGyro") startMetalIdle();
+          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        }
+      }
+
+      async function bootOpen() {
+        if (busy) return;
+        busy = true;
+        try {
+          await runBoot(defaultBoot, bootCtx, bootCanvas, bootHit, "hub");
+        } finally {
+          busy = false;
+        }
+      }
+
+      async function runStageBoot() {
+        if (busy) return;
+        busy = true;
+        document.getElementById("stage-hint").textContent = pendingLabel + "…";
+        try {
+          if (pendingBoot === "metalGyro") drawMetalLogo(stageCtx, stageCanvas, stageWrap, 0, 0, 1);
+          else drawSolid(stageCtx, stageCanvas, stageWrap, 0.42, 0, 0, 1);
+          await wait(120);
+          await runBoot(pendingBoot, stageCtx, stageCanvas, stageWrap, "boot-result");
+        } finally {
+          busy = false;
+          document.getElementById("stage-hint").textContent = "";
+        }
+      }
+
+      async function fadeNav(toId) {
+        if (busy) return;
+        var to = document.getElementById(toId);
+        if (!to) return;
+        var from =
+          document.querySelector(".screen.is-active") ||
+          document.querySelector(".screen:target") ||
+          document.getElementById("home");
+        if (from && from.id === toId) return;
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          skipHash = true;
+          location.hash = toId;
+          syncActive(toId);
+          skipHash = false;
+          if (toId === "home") {
+            if (defaultBoot === "metalGyro") startMetalIdle();
+            else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          }
+          if (toId === "boot-stage") runStageBoot();
+          return;
+        }
+
+        busy = true;
+        try {
+          if (from && from.id === "home") stopMetalIdle();
+          fx.classList.add("is-on");
+          layer.style.background = "#fff";
+          layer.style.opacity = "0";
+          await tween(120, function (e) { layer.style.opacity = String(e); });
+          skipHash = true;
+          location.hash = toId;
+          syncActive(toId);
+          skipHash = false;
+          if (toId === "home") {
+            if (defaultBoot === "metalGyro") startMetalIdle();
+            else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          }
+          await tween(120, function (e) { layer.style.opacity = String(1 - e); });
+          fx.classList.remove("is-on");
+          if (toId === "boot-stage") {
+            busy = false;
+            await runStageBoot();
+            return;
+          }
+        } finally {
+          busy = false;
+        }
+      }
+
+      bootHit.addEventListener("click", function (e) {
+        e.preventDefault();
+        bootOpen();
+      });
+
+      document.querySelectorAll("[data-nav]").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+          var href = el.getAttribute("href") || "";
+          if (href.charAt(0) !== "#") return;
+          e.preventDefault();
+          fadeNav(href.slice(1));
+        });
+      });
+
+      document.querySelectorAll("[data-boot]").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+          e.preventDefault();
+          pendingBoot = el.getAttribute("data-boot") || "zoomDither";
+          pendingLabel = el.getAttribute("data-label") || pendingBoot;
+          fadeNav("boot-stage");
+        });
+      });
+
+      window.addEventListener("hashchange", function () {
+        if (skipHash) return;
+        var id = (location.hash || "#home").slice(1);
+        if (!document.getElementById(id)) id = "home";
+        syncActive(id);
+        if (id === "home") {
+          if (defaultBoot === "metalGyro") startMetalIdle();
+          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        } else {
+          stopMetalIdle();
+        }
+      });
+
+      window.addEventListener("resize", function () {
+        if (document.getElementById("home").classList.contains("is-active")) {
+          metalMask = null;
+          metalMaskKey = "";
+          if (defaultBoot === "metalGyro") drawMetalLogo(bootCtx, bootCanvas, bootHit, 0, 0, 1);
+          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        }
+      });
+
+      bootGyroBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        enableGyroFromGesture();
+      });
+
+      logoImg.onload = function () {
+        logoReady = true;
+        if (defaultBoot === "metalGyro") startMetalIdle();
+        else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+      };
+      logoImg.src = "ignara-wordmark.svg";
+
+      var start = (location.hash || "#home").slice(1);
+      if (!document.getElementById(start)) start = "home";
+      syncActive(start);
+      if (start !== "home") stopMetalIdle();
+    })();
+  </script>
+</body>
+</html>
