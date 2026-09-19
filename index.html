@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.12</title>
+  <title>Ignara · 0.13</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -89,7 +89,7 @@
       <div class="center">
         <a class="home-btn" href="#hub" data-nav data-fx="fade">
           <h1>Ignara, Lore Book</h1>
-          <span class="muted">versión 0.12</span>
+          <span class="muted">versión 0.13</span>
         </a>
       </div>
     </section>
@@ -97,11 +97,11 @@
     <section class="screen" id="hub">
       <div class="nav"><a class="back" href="#home" data-nav data-fx="fade">← inicio</a></div>
       <h2>Archivo</h2>
-      <p class="intro">Diez transiciones rápidas y simples. Probálas y elige.</p>
+      <p class="intro">Recopilación mínima del mundo de Ignara. Transición: fade.</p>
       <div class="list">
         <a href="#world" data-nav data-fx="fade"><span>World</span><span class="arrow">→</span></a>
         <a href="#character-sheets" data-nav data-fx="fade"><span>Character sheets</span><span class="arrow">→</span></a>
-        <a href="#anim-tests" data-nav data-fx="fade"><span>Pruebas de animación</span><span class="arrow">→</span></a>
+        <a href="#propiedad" data-nav data-fx="fade"><span>Propiedad</span><span class="arrow">→</span></a>
       </div>
     </section>
 
@@ -110,7 +110,7 @@
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.12.</p>
+Marcador de posición · versión 0.13.</p>
       <span class="tag">placeholder</span>
     </section>
 
@@ -131,30 +131,26 @@ El texto canónico lo escribe Julián.</p>
       <span class="tag">placeholder</span>
     </section>
 
-    <section class="screen" id="anim-tests">
+
+    <section class="screen" id="propiedad">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
-      <h2>Pruebas de animación</h2>
-      <p class="intro">Rápidas, limpias, sin dither. Cada toque dura menos de medio segundo.</p>
-      <div class="list">
-        <a href="#anim-result" data-nav data-fx="cut" data-label="Hard cut"><span>1 · Hard cut</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="fade" data-label="Fade"><span>2 · Fade</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="dip" data-label="Dip black"><span>3 · Dip black</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="flash" data-label="White flash"><span>4 · White flash</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="wipeup" data-label="Wipe up"><span>5 · Wipe up</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="wiperight" data-label="Wipe right"><span>6 · Wipe right</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="slideup" data-label="Slide up"><span>7 · Slide up</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="slideleft" data-label="Slide left"><span>8 · Slide left</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="punch" data-label="Punch"><span>9 · Punch</span><span class="arrow">→</span></a>
-        <a href="#anim-result" data-nav data-fx="push" data-label="Push"><span>10 · Push</span><span class="arrow">→</span></a>
-      </div>
+      <h2>Propiedad</h2>
+      <p class="body">Aviso de autoría y uso
+
+Ignara, Ignara Lore Book y los textos, nombres, conceptos y materiales publicados en este sitio son obra original de Julián, autor de la trilogía Ignara.
+
+© 2026 Julián. Todos los derechos reservados.
+
+Queda prohibida la reproducción, distribución, modificación o uso comercial de estos materiales sin autorización previa y por escrito del autor.
+
+Este aviso documenta la autoría y el uso público de la obra. No constituye asesoría legal ni implica, por sí solo, el registro de una marca ante una oficina de propiedad intelectual.
+
+Primera publicación pública de este lorebook: 2026, en https://thejulianbeck.github.io/ignara-lorebook/
+
+Para consultas sobre derechos: contactar al autor.</p>
+      <span class="tag">aviso · no es marca registrada</span>
     </section>
 
-    <section class="screen" id="anim-result">
-      <div class="nav"><a class="back" href="#anim-tests" data-nav data-fx="fade">← pruebas</a></div>
-      <h2 id="result-title">Transición</h2>
-      <p class="body" id="result-body">Acabas de ver la transición rápida.</p>
-      <span class="tag">demo</span>
-    </section>
   </div>
   <script>
     (function () {
@@ -163,7 +159,6 @@ El texto canónico lo escribe Julián.</p>
       var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
       var busy = false;
       var skipHash = false;
-      var lastLabel = "Transición";
 
       function syncActive(id) {
         screens.forEach(function (el) {
@@ -172,12 +167,6 @@ El texto canónico lo escribe Julián.</p>
         window.scrollTo(0, 0);
       }
 
-      function fillResult(label) {
-        lastLabel = label || "Transición";
-        document.getElementById("result-title").textContent = lastLabel;
-        document.getElementById("result-body").textContent =
-          "Acabas de ver \"" + lastLabel + "\". Rápida y simple. Vuelve a comparar.";
-      }
 
       function wait(ms) {
         return new Promise(function (r) { setTimeout(r, ms); });
@@ -210,87 +199,14 @@ El texto canónico lo escribe Julián.</p>
       }
 
       async function run(name, midFn) {
+        // Solo fade (elegido por Julián)
         fx.classList.add("is-on");
         resetLayer();
-
-        if (name === "cut") {
-          layer.style.background = "#111";
-          layer.style.opacity = "1";
-          await wait(70);
-          midFn();
-          await wait(40);
-        } else if (name === "fade") {
-          layer.style.background = "#fff";
-          layer.style.opacity = "0";
-          await tween(160, function (e) { layer.style.opacity = String(e); });
-          midFn();
-          await tween(160, function (e) { layer.style.opacity = String(1 - e); });
-        } else if (name === "dip") {
-          layer.style.background = "#111";
-          layer.style.opacity = "0";
-          await tween(120, function (e) { layer.style.opacity = String(e); });
-          await wait(50);
-          midFn();
-          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
-        } else if (name === "flash") {
-          layer.style.background = "#fff";
-          layer.style.opacity = "0";
-          await tween(90, function (e) { layer.style.opacity = String(e); });
-          midFn();
-          await tween(140, function (e) { layer.style.opacity = String(1 - e); });
-        } else if (name === "wipeup") {
-          layer.style.background = "#111";
-          layer.style.transformOrigin = "bottom center";
-          layer.style.transform = "scaleY(0)";
-          await tween(180, function (e) { layer.style.transform = "scaleY(" + e + ")"; });
-          midFn();
-          layer.style.transformOrigin = "top center";
-          await tween(180, function (e) { layer.style.transform = "scaleY(" + (1 - e) + ")"; });
-        } else if (name === "wiperight") {
-          layer.style.background = "#111";
-          layer.style.transformOrigin = "left center";
-          layer.style.transform = "scaleX(0)";
-          await tween(180, function (e) { layer.style.transform = "scaleX(" + e + ")"; });
-          midFn();
-          layer.style.transformOrigin = "right center";
-          await tween(180, function (e) { layer.style.transform = "scaleX(" + (1 - e) + ")"; });
-        } else if (name === "slideup") {
-          layer.style.background = "#111";
-          layer.style.transform = "translateY(100%)";
-          await tween(200, function (e) { layer.style.transform = "translateY(" + ((1 - e) * 100) + "%)"; });
-          midFn();
-          await tween(200, function (e) { layer.style.transform = "translateY(" + (-e * 100) + "%)"; });
-        } else if (name === "slideleft") {
-          layer.style.background = "#111";
-          layer.style.transform = "translateX(-100%)";
-          await tween(200, function (e) { layer.style.transform = "translateX(" + ((-1 + e) * 100) + "%)"; });
-          midFn();
-          await tween(200, function (e) { layer.style.transform = "translateX(" + (e * 100) + "%)"; });
-        } else if (name === "punch") {
-          layer.style.background = "#111";
-          layer.style.transformOrigin = "center";
-          layer.style.transform = "scale(0.6)";
-          layer.style.opacity = "0";
-          await tween(150, function (e) {
-            layer.style.opacity = String(e);
-            layer.style.transform = "scale(" + (0.6 + e * 0.4) + ")";
-          });
-          midFn();
-          await tween(150, function (e) {
-            layer.style.opacity = String(1 - e);
-            layer.style.transform = "scale(" + (1 + e * 0.08) + ")";
-          });
-        } else if (name === "push") {
-          // black bar pushes content feel: cover from bottom quickly, then leave upward
-          layer.style.background = "#111";
-          layer.style.transform = "translateY(100%)";
-          await tween(160, function (e) { layer.style.transform = "translateY(" + ((1 - e) * 100) + "%)"; });
-          midFn();
-          await tween(160, function (e) { layer.style.transform = "translateY(" + (-e * 100) + "%)"; });
-        } else {
-          midFn();
-        }
-
+        layer.style.background = "#fff";
+        layer.style.opacity = "0";
+        await tween(160, function (e) { layer.style.opacity = String(e); });
+        midFn();
+        await tween(160, function (e) { layer.style.opacity = String(1 - e); });
         fx.classList.remove("is-on");
         resetLayer();
       }
@@ -306,7 +222,6 @@ El texto canónico lo escribe Julián.</p>
         if (from && from.id === toId && toId !== "anim-result") return;
 
         name = name || "fade";
-        if (toId === "anim-result") fillResult(label);
 
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           skipHash = true;
@@ -343,7 +258,6 @@ El texto canónico lo escribe Julián.</p>
         var id = (location.hash || "#home").slice(1);
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
-        if (id === "anim-result") fillResult(lastLabel);
       });
 
       var start = (location.hash || "#home").slice(1);
