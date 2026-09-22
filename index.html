@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.19</title>
+  <title>Ignara · 0.20</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -104,8 +104,8 @@
           <canvas id="boot-canvas" width="497" height="152"></canvas>
         </button>
         <span class="tm">™</span>
-        <span class="muted">versión 0.19 · tocar para entrar</span>
-        <button type="button" id="boot-gyro">Activar inclinación</button>
+        <span class="muted">versión 0.20 · tocar para entrar</span>
+        <button type="button" id="boot-gyro" hidden>Activar inclinación</button>
       </div>
     </section>
 
@@ -126,7 +126,7 @@
       <h2>World</h2>
       <p class="body">Prueba — World.
 
-Marcador de posición · versión 0.19.</p>
+Marcador de posición · versión 0.20.</p>
       <span class="tag">placeholder</span>
     </section>
 
@@ -150,19 +150,20 @@ El texto canónico lo escribe Julián.</p>
     <section class="screen" id="boot-tests">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Pruebas de portada</h2>
-      <p class="intro">Once entradas del wordmark (la principal ahora es metalGyro: oro cromado 3D + giroscopio, ~0.8s, sin zoom). Tocá una para probar.</p>
+      <p class="intro">Doce entradas del wordmark (la principal ahora es inkDissolve: tinta negra 2D que se disuelve en arena/líquido hacia blanco, ~0.85s, sin zoom). Tocá una para probar.</p>
       <div class="list">
-        <a href="#boot-stage" data-boot="metalGyro" data-label="Gold chrome gyro"><span>1 · Gold chrome gyro</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>2 · ASCII morph</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>3 · Zoom dither</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>4 · Soft fade</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>5 · Punch</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>6 · Rise</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>7 · Snap flash</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>8 · Sink</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>9 · Slices</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>10 · Bloom</span><span class="arrow">→</span></a>
-        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>11 · Hard cut</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="inkDissolve" data-label="Disolve tinta"><span>1 · Disolve tinta</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="metalGyro" data-label="Gold chrome gyro"><span>2 · Gold chrome gyro</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>3 · ASCII morph</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>4 · Zoom dither</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>5 · Soft fade</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>6 · Punch</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>7 · Rise</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>8 · Snap flash</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>9 · Sink</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>10 · Slices</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>11 · Bloom</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>12 · Hard cut</span><span class="arrow">→</span></a>
       </div>
     </section>
 
@@ -213,9 +214,9 @@ Para consultas sobre derechos: contactar al autor.</p>
       var skipHash = false;
       var logoImg = new Image();
       var logoReady = false;
-      var pendingBoot = "metalGyro";
-      var pendingLabel = "Gold chrome gyro";
-      var defaultBoot = "metalGyro";
+      var pendingBoot = "inkDissolve";
+      var pendingLabel = "Disolve tinta";
+      var defaultBoot = "inkDissolve";
       var bootGyroBtn = document.getElementById("boot-gyro");
       var metalIdleOn = false;
       var metalRaf = 0;
@@ -236,6 +237,234 @@ Para consultas sobre derechos: contactar al autor.</p>
         [3,35,11,43,1,33,9,41],[51,19,59,27,49,17,57,25],
         [15,47,7,39,13,45,5,37],[63,31,55,23,61,29,53,21]
       ];
+
+      var inkMask = null;
+      var inkMaskKey = "";
+      var inkOutCanvas = null;
+      var inkOutCtx = null;
+      var INK_SCALE = 0.72;
+
+      function hashNoise(x, y) {
+        var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+        return n - Math.floor(n);
+      }
+
+      function fadeSmooth(t) {
+        return t * t * (3 - 2 * t);
+      }
+
+      function valueNoise2(x, y) {
+        var x0 = Math.floor(x), y0 = Math.floor(y);
+        var fx = fadeSmooth(x - x0), fy = fadeSmooth(y - y0);
+        var a = hashNoise(x0, y0);
+        var b = hashNoise(x0 + 1, y0);
+        var c = hashNoise(x0, y0 + 1);
+        var d = hashNoise(x0 + 1, y0 + 1);
+        return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
+      }
+
+      function fbm2(x, y) {
+        var v = 0, a = 0.5, f = 1;
+        for (var o = 0; o < 3; o++) {
+          v += a * valueNoise2(x * f, y * f);
+          a *= 0.5;
+          f *= 2.03;
+        }
+        return v;
+      }
+
+      function ensureInkOut(pw, ph) {
+        if (!inkOutCanvas || inkOutCanvas.width !== pw || inkOutCanvas.height !== ph) {
+          inkOutCanvas = document.createElement("canvas");
+          inkOutCanvas.width = pw;
+          inkOutCanvas.height = ph;
+          inkOutCtx = inkOutCanvas.getContext("2d");
+        }
+      }
+
+      function buildInkMask(cssW, cssH, dpr) {
+        // Half-res dissolve buffer for iPhone smoothness (dpr already capped at 2)
+        var bufScale = 0.5;
+        var key = Math.round(cssW) + "x" + Math.round(cssH) + "@" + dpr.toFixed(2) + "h";
+        if (inkMask && inkMaskKey === key) return inkMask;
+        var lw = cssW * INK_SCALE, lh = cssH * INK_SCALE;
+        var x0 = (cssW - lw) / 2, y0 = (cssH - lh) / 2;
+        var pw = Math.max(1, Math.floor(cssW * dpr * bufScale));
+        var ph = Math.max(1, Math.floor(cssH * dpr * bufScale));
+        var off = document.createElement("canvas");
+        off.width = pw; off.height = ph;
+        var octx = off.getContext("2d");
+        octx.setTransform(1, 0, 0, 1, 0, 0);
+        octx.clearRect(0, 0, pw, ph);
+        octx.imageSmoothingEnabled = true;
+        octx.drawImage(logoImg, x0 * dpr * bufScale, y0 * dpr * bufScale, lw * dpr * bufScale, lh * dpr * bufScale);
+        var img = octx.getImageData(0, 0, pw, ph);
+        var data = img.data;
+        var n = pw * ph;
+        var alpha = new Float32Array(n);
+        var edge = new Float32Array(n);
+        var INF = 1e6;
+        var i, x, y;
+        for (i = 0; i < n; i++) {
+          alpha[i] = data[i * 4 + 3] / 255;
+          edge[i] = alpha[i] > 0.08 ? INF : 0;
+        }
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.08) { edge[i] = 0; continue; }
+            var best = edge[i];
+            if (x > 0) best = Math.min(best, edge[i - 1] + 1);
+            if (y > 0) best = Math.min(best, edge[i - pw] + 1);
+            if (x > 0 && y > 0) best = Math.min(best, edge[i - pw - 1] + 1.414);
+            if (x + 1 < pw && y > 0) best = Math.min(best, edge[i - pw + 1] + 1.414);
+            edge[i] = best;
+          }
+        }
+        for (y = ph - 1; y >= 0; y--) {
+          for (x = pw - 1; x >= 0; x--) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.08) { edge[i] = 0; continue; }
+            var best2 = edge[i];
+            if (x + 1 < pw) best2 = Math.min(best2, edge[i + 1] + 1);
+            if (y + 1 < ph) best2 = Math.min(best2, edge[i + pw] + 1);
+            if (x + 1 < pw && y + 1 < ph) best2 = Math.min(best2, edge[i + pw + 1] + 1.414);
+            if (x > 0 && y + 1 < ph) best2 = Math.min(best2, edge[i + pw - 1] + 1.414);
+            edge[i] = best2;
+          }
+        }
+        var maxE = 1;
+        for (i = 0; i < n; i++) if (edge[i] < INF && edge[i] > maxE) maxE = edge[i];
+        inkMask = {
+          pw: pw, ph: ph, alpha: alpha, edge: edge, maxE: maxE,
+          cssW: cssW, cssH: cssH, dpr: dpr, bufScale: bufScale
+        };
+        inkMaskKey = key;
+        return inkMask;
+      }
+
+      function sampleInkAlpha(mask, sx, sy, blurR) {
+        var pw = mask.pw, ph = mask.ph, alpha = mask.alpha;
+        var x = Math.round(sx), y = Math.round(sy);
+        if (blurR < 0.6) {
+          if (x < 0 || y < 0 || x >= pw || y >= ph) return 0;
+          return alpha[y * pw + x];
+        }
+        var r = Math.min(3, Math.ceil(blurR));
+        var sum = 0, wsum = 0;
+        var yy, xx, dy, dx, w, ix, iy;
+        for (dy = -r; dy <= r; dy++) {
+          iy = y + dy;
+          if (iy < 0 || iy >= ph) continue;
+          for (dx = -r; dx <= r; dx++) {
+            ix = x + dx;
+            if (ix < 0 || ix >= pw) continue;
+            w = 1 / (1 + dx * dx + dy * dy);
+            sum += alpha[iy * pw + ix] * w;
+            wsum += w;
+          }
+        }
+        return wsum > 0 ? sum / wsum : 0;
+      }
+
+      function drawInkSolid(ctx, canvas, host) {
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        var lw = size.w * INK_SCALE, lh = size.h * INK_SCALE;
+        var x = (size.w - lw) / 2, y = (size.h - lh) / 2;
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(logoImg, x, y, lw, lh);
+      }
+
+      function drawInkDissolve(ctx, canvas, host, progress) {
+        if (!logoReady) return;
+        progress = clamp01(progress);
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
+        var mask = buildInkMask(size.w, size.h, dpr);
+        var pw = mask.pw, ph = mask.ph;
+        ensureInkOut(pw, ph);
+        var out = inkOutCtx.createImageData(pw, ph);
+        var od = out.data;
+        // Threshold rises: edges (low edge dist) fail first → sand erosion from silhouette
+        var thresh = progress * 1.38;
+        var smear = progress * progress * 7.5; // liquid UV displacement (px in buf space)
+        var blurR = progress * 2.2; // gooey pre-threshold soften
+        var grain = 0.42 + progress * 0.22;
+        var i, x, y, a, eN, nSand, nLiq, sx, sy, keep, v, edgeBias;
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            // Mild Perlin-ish UV offset — stronger horizontally (liquid smear)
+            nLiq = fbm2(x * 0.055, y * 0.07 + progress * 2.4);
+            sx = x + (nLiq - 0.5) * smear * 1.35;
+            sy = y + (fbm2(x * 0.04 + 19.7, y * 0.05) - 0.5) * smear * 0.55;
+            a = sampleInkAlpha(mask, sx, sy, blurR);
+            if (a < 0.04) continue;
+            // Edge distance at source (approx)
+            var ix = Math.max(0, Math.min(pw - 1, Math.round(sx)));
+            var iy = Math.max(0, Math.min(ph - 1, Math.round(sy)));
+            eN = mask.edge[iy * pw + ix] / mask.maxE;
+            // Stochastic sand: hashed noise + Bayer-ish tertiary
+            nSand = hashNoise(x * 1.7 + 3.1, y * 1.9 + 7.3);
+            nSand = nSand * 0.72 + (BAYER[y & 7][x & 7] / 64) * 0.28;
+            edgeBias = 0.22 + 0.78 * eN; // interior holds longer
+            keep = a * edgeBias + (1 - nSand) * grain * 0.55;
+            // Extra edge freckle scatter late in dissolve
+            if (progress > 0.35 && eN < 0.35) {
+              keep -= (progress - 0.35) * 0.55 * nSand;
+            }
+            if (keep > thresh) {
+              v = i * 4;
+              // Thin ink: late frames go soft gray before vanish (not opacity-only fade)
+              var ink = 1;
+              if (progress > 0.55) {
+                ink = 1 - (progress - 0.55) / 0.45 * 0.35 * (1 - eN);
+              }
+              var g = Math.round(17 * ink);
+              od[v] = g; od[v + 1] = g; od[v + 2] = g;
+              od[v + 3] = Math.round(Math.min(1, a * 1.05) * 255);
+            }
+          }
+        }
+        inkOutCtx.putImageData(out, 0, 0);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(inkOutCanvas, 0, 0, canvas.width, canvas.height);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      async function runInkDissolveEnter(ctx, canvas, host, thenHash) {
+        stopMetalIdle();
+        var steps = 34; // ~850ms at 25ms
+        for (var i = 0; i <= steps; i++) {
+          var p = i / steps;
+          var e = easeOut(p);
+          drawInkDissolve(ctx, canvas, host, e);
+          await wait(25);
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+      }
+
+      function drawHomeIdle() {
+        if (defaultBoot === "metalGyro") {
+          bootGyroBtn.hidden = false;
+          startMetalIdle();
+        } else {
+          bootGyroBtn.hidden = true;
+          stopMetalIdle();
+          drawInkSolid(bootCtx, bootCanvas, bootHit);
+        }
+      }
 
       function syncActive(id) {
         screens.forEach(function (el) {
@@ -818,7 +1047,10 @@ Para consultas sobre derechos: contactar al autor.</p>
 
       async function runBoot(kind, ctx, canvas, host, thenHash) {
         var start = 0.42;
-        if (kind === "metalGyro") {
+        if (kind === "inkDissolve") {
+          await runInkDissolveEnter(ctx, canvas, host, thenHash);
+          return;
+        } else if (kind === "metalGyro") {
           await runMetalGyroEnter(ctx, canvas, host, thenHash);
           return;
         } else if (kind === "asciiMorph") {
@@ -901,8 +1133,7 @@ Para consultas sobre derechos: contactar al autor.</p>
             "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
         }
         if (host === bootHit) {
-          if (defaultBoot === "metalGyro") startMetalIdle();
-          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          drawHomeIdle();
         }
       }
 
@@ -922,6 +1153,7 @@ Para consultas sobre derechos: contactar al autor.</p>
         document.getElementById("stage-hint").textContent = pendingLabel + "…";
         try {
           if (pendingBoot === "metalGyro") drawMetalLogo(stageCtx, stageCanvas, stageWrap, 0, 0, 1);
+          else if (pendingBoot === "inkDissolve") drawInkSolid(stageCtx, stageCanvas, stageWrap);
           else drawSolid(stageCtx, stageCanvas, stageWrap, 0.42, 0, 0, 1);
           await wait(120);
           await runBoot(pendingBoot, stageCtx, stageCanvas, stageWrap, "boot-result");
@@ -946,10 +1178,7 @@ Para consultas sobre derechos: contactar al autor.</p>
           location.hash = toId;
           syncActive(toId);
           skipHash = false;
-          if (toId === "home") {
-            if (defaultBoot === "metalGyro") startMetalIdle();
-            else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
-          }
+          if (toId === "home") drawHomeIdle();
           if (toId === "boot-stage") runStageBoot();
           return;
         }
@@ -965,10 +1194,7 @@ Para consultas sobre derechos: contactar al autor.</p>
           location.hash = toId;
           syncActive(toId);
           skipHash = false;
-          if (toId === "home") {
-            if (defaultBoot === "metalGyro") startMetalIdle();
-            else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
-          }
+          if (toId === "home") drawHomeIdle();
           await tween(120, function (e) { layer.style.opacity = String(1 - e); });
           fx.classList.remove("is-on");
           if (toId === "boot-stage") {
@@ -1010,8 +1236,7 @@ Para consultas sobre derechos: contactar al autor.</p>
         if (!document.getElementById(id)) id = "home";
         syncActive(id);
         if (id === "home") {
-          if (defaultBoot === "metalGyro") startMetalIdle();
-          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          drawHomeIdle();
         } else {
           stopMetalIdle();
         }
@@ -1021,8 +1246,10 @@ Para consultas sobre derechos: contactar al autor.</p>
         if (document.getElementById("home").classList.contains("is-active")) {
           metalMask = null;
           metalMaskKey = "";
+          inkMask = null;
+          inkMaskKey = "";
           if (defaultBoot === "metalGyro") drawMetalLogo(bootCtx, bootCanvas, bootHit, 0, 0, 1);
-          else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+          else drawInkSolid(bootCtx, bootCanvas, bootHit);
         }
       });
 
@@ -1034,8 +1261,7 @@ Para consultas sobre derechos: contactar al autor.</p>
 
       logoImg.onload = function () {
         logoReady = true;
-        if (defaultBoot === "metalGyro") startMetalIdle();
-        else drawSolid(bootCtx, bootCanvas, bootHit, 0.42, 0, 0, 1);
+        drawHomeIdle();
       };
       logoImg.src = "ignara-wordmark.svg";
 
