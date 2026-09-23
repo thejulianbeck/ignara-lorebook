@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.21</title>
+  <title>Ignara · 0.22</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -115,16 +115,25 @@
       display: inline-block; color: var(--muted); font-size: 0.6875rem;
       letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0;
     }
-    .list a .meta, .list .locked-row .meta {
+    .list a .meta {
       display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0;
     }
-    .locked-row {
-      padding: 1.1rem 0; min-height: 3rem; border-bottom: 1px solid var(--line);
-      display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
-      color: var(--muted); cursor: default; -webkit-user-select: none; user-select: none;
+    .lock-ico {
+      width: 12px; height: 14px; flex-shrink: 0; display: block;
     }
-    .lock-ico { font-size: 0.8125rem; }
-    .list a.is-locked { pointer-events: none; color: var(--muted); }
+    .list a.is-locked {
+      pointer-events: auto; color: var(--muted); cursor: pointer;
+    }
+    .list a.is-locked:active { opacity: 0.7; }
+    .unlock-banner {
+      margin: 0 0 1.1rem; padding: 0.85rem 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      font-size: 0.875rem; color: var(--fg);
+    }
+    .unlock-banner[hidden] { display: none !important; }
+    .toggle-row.is-hint {
+      outline: 1px solid #bbb; outline-offset: 2px;
+    }
     .toggle-row {
       padding: 1.1rem 0; min-height: 3.25rem; border-bottom: 1px solid var(--line);
       display: flex; justify-content: space-between; align-items: center; gap: 1rem;
@@ -165,7 +174,7 @@
           <canvas id="boot-canvas" width="497" height="152"></canvas>
         </button>
         <span class="tm">™</span>
-        <span class="muted">versión 0.21 · tocar para entrar</span>
+        <span class="muted">versión 0.22 · tocar para entrar</span>
         <button type="button" id="boot-gyro" hidden>Activar inclinación</button>
       </div>
     </section>
@@ -460,6 +469,9 @@
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Progreso</h2>
       <p class="intro">Marca los libros que ya terminaste. El archivo solo abre esas secciones.</p>
+      <div id="unlock-banner" class="unlock-banner" hidden data-unlock-banner>
+        <p id="unlock-banner-text"></p>
+      </div>
       <div class="list" style="border-top: 1px solid var(--line);">
         <div class="toggle-row" data-book-toggle="1">
           <span class="name">Ignara 1</span>
@@ -494,16 +506,16 @@
     <section class="screen" id="bloqueado">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Bloqueado</h2>
-      <p class="body">Esta sección pide otro libro. Marcá el progreso en Progreso cuando lo hayas terminado.</p>
+      <p class="body">Esta sección pide otro libro. Marca el progreso en Progreso cuando lo hayas terminado.</p>
       <span class="tag">spoiler gate</span>
     </section>
 
     <section class="screen" id="boot-tests">
       <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
       <h2>Pruebas de portada</h2>
-      <p class="intro">Doce entradas del wordmark (la principal ahora es inkDissolve: tinta negra 2D que se disuelve en arena/líquido hacia blanco, ~0.85s, sin zoom). Tocá una para probar.</p>
+      <p class="intro">Doce entradas del wordmark (la principal ahora es inkDissolve: tinta negra 2D que se disuelve en arena/líquido hacia blanco, ~0.85s, sin zoom). Toca una para probar.</p>
       <div class="list">
-        <a href="#boot-stage" data-boot="inkDissolve" data-label="Disolve tinta"><span>1 · Disolve tinta</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="inkDissolve" data-label="Disuelve tinta"><span>1 · Disuelve tinta</span><span class="arrow">→</span></a>
         <a href="#boot-stage" data-boot="metalGyro" data-label="Gold chrome gyro"><span>2 · Gold chrome gyro</span><span class="arrow">→</span></a>
         <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>3 · ASCII morph</span><span class="arrow">→</span></a>
         <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>4 · Zoom dither</span><span class="arrow">→</span></a>
@@ -566,7 +578,7 @@ Para consultas sobre derechos: contactar al autor.</p>
       var logoImg = new Image();
       var logoReady = false;
       var pendingBoot = "inkDissolve";
-      var pendingLabel = "Disolve tinta";
+      var pendingLabel = "Disuelve tinta";
       var defaultBoot = "inkDissolve";
       var bootGyroBtn = document.getElementById("boot-gyro");
       var metalIdleOn = false;
@@ -822,6 +834,11 @@ Para consultas sobre derechos: contactar al autor.</p>
           el.classList.toggle("is-active", el.id === id);
         });
         window.scrollTo(0, 0);
+        if (id === "progreso") {
+          showUnlockBannerIfNeeded();
+        } else {
+          hideUnlockBanner();
+        }
       }
 
       function wait(ms) {
@@ -1565,6 +1582,53 @@ Para consultas sobre derechos: contactar al autor.</p>
 
       var BOOKS_KEY = "ignara-codex-books";
       var booksState = { "1": true, "2": false, "3": false };
+      var pendingUnlockBook = null;
+      var pendingUnlockTitle = "";
+      var LOCK_SVG =
+        '<svg class="lock-ico" width="12" height="14" viewBox="0 0 12 14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.25">' +
+        '<rect x="2" y="6" width="8" height="7" rx="0.5"/>' +
+        '<path d="M4 6V4.5a2 2 0 0 1 4 0V6"/>' +
+        "</svg>";
+
+      function hideUnlockBanner() {
+        var banner = document.getElementById("unlock-banner");
+        if (banner) banner.hidden = true;
+        document.querySelectorAll(".toggle-row.is-hint").forEach(function (row) {
+          row.classList.remove("is-hint");
+        });
+        pendingUnlockBook = null;
+        pendingUnlockTitle = "";
+      }
+
+      function showUnlockBannerIfNeeded() {
+        var banner = document.getElementById("unlock-banner");
+        var text = document.getElementById("unlock-banner-text");
+        if (!banner || !text) return;
+        if (!pendingUnlockBook) return;
+        var n = String(pendingUnlockBook);
+        var title = (pendingUnlockTitle || "").replace(/\s*·\s*Ignara\s+\d+/i, "").trim();
+        if (title) {
+          text.textContent =
+            title + " pertenece a Ignara " + n +
+            ". Márcalo como leído abajo para abrirlo.";
+        } else {
+          text.textContent =
+            "Esta entrada es de Ignara " + n +
+            ". Márcala abajo cuando hayas terminado ese libro.";
+        }
+        banner.hidden = false;
+        document.querySelectorAll(".toggle-row.is-hint").forEach(function (row) {
+          row.classList.remove("is-hint");
+        });
+        var row = document.querySelector('.toggle-row[data-book-toggle="' + n + '"]');
+        if (row) row.classList.add("is-hint");
+        pendingUnlockTitle = "";
+      }
+
+      function setPendingUnlock(book, title) {
+        pendingUnlockBook = book ? String(book) : null;
+        pendingUnlockTitle = title || "";
+      }
 
       function loadBooks() {
         try {
@@ -1593,7 +1657,10 @@ Para consultas sobre derechos: contactar al autor.</p>
         var el = document.getElementById(id);
         if (!el) return "home";
         var book = el.getAttribute("data-book");
-        if (book && !isBookUnlocked(book)) return "bloqueado";
+        if (book && !isBookUnlocked(book)) {
+          setPendingUnlock(book, el.querySelector("h2") ? el.querySelector("h2").textContent : "");
+          return "progreso";
+        }
         return id;
       }
 
@@ -1611,42 +1678,26 @@ Para consultas sobre derechos: contactar al autor.</p>
       }
 
       function applySpoilerGates() {
+        document.querySelectorAll(".locked-row").forEach(function (stub) {
+          if (stub.parentNode) stub.parentNode.removeChild(stub);
+        });
         document.querySelectorAll("a[data-book][data-nav]").forEach(function (a) {
           var book = a.getAttribute("data-book");
           var unlocked = isBookUnlocked(book);
-          var parent = a.parentNode;
-          if (!parent) return;
+          var meta = a.querySelector(".meta");
+          a.hidden = false;
+          a.removeAttribute("data-stubbed");
+          if (!meta) return;
+          var badge = meta.querySelector(".badge");
+          var badgeHtml = badge
+            ? badge.outerHTML
+            : ('<span class="badge">Ignara ' + book + "</span>");
           if (!unlocked) {
-            if (a.getAttribute("data-stubbed") === "1") return;
-            var stub = document.createElement("div");
-            stub.className = "locked-row";
-            stub.setAttribute("data-book", book);
-            stub.setAttribute("data-stub-for", a.getAttribute("href") || "");
-            var title = a.querySelector("span") ? a.querySelector("span").textContent : a.textContent;
-            var badgeText = "Ignara " + book;
-            stub.innerHTML =
-              "<span>" + title + "</span>" +
-              "<span class=\"meta\"><span class=\"badge\">" + badgeText +
-              "</span><span class=\"lock-ico\" aria-hidden=\"true\">🔒</span></span>";
-            a.setAttribute("data-stubbed", "1");
-            a.hidden = true;
-            parent.insertBefore(stub, a);
+            a.classList.add("is-locked");
+            meta.innerHTML = badgeHtml + LOCK_SVG;
           } else {
-            a.hidden = false;
-            a.removeAttribute("data-stubbed");
-            var prev = a.previousElementSibling;
-            if (prev && prev.classList.contains("locked-row") &&
-                prev.getAttribute("data-stub-for") === (a.getAttribute("href") || "")) {
-              prev.parentNode.removeChild(prev);
-            }
-          }
-        });
-        // clean orphan stubs when unlocked
-        document.querySelectorAll(".locked-row").forEach(function (stub) {
-          var href = stub.getAttribute("data-stub-for");
-          var a = href ? document.querySelector('a[data-book][href="' + href + '"]') : null;
-          if (a && !a.hidden && isBookUnlocked(a.getAttribute("data-book"))) {
-            stub.parentNode.removeChild(stub);
+            a.classList.remove("is-locked");
+            meta.innerHTML = badgeHtml + '<span class="arrow">→</span>';
           }
         });
       }
@@ -1656,6 +1707,10 @@ Para consultas sobre derechos: contactar al autor.</p>
         saveBooks();
         refreshBookToggles();
         applySpoilerGates();
+        if (on && pendingUnlockBook && String(n) === String(pendingUnlockBook)) {
+          pendingUnlockBook = null;
+          hideUnlockBanner();
+        }
       }
 
       loadBooks();
@@ -1681,7 +1736,10 @@ Para consultas sobre derechos: contactar al autor.</p>
           var targetId = href.slice(1);
           var linkBook = navEl.getAttribute("data-book");
           if (linkBook && !isBookUnlocked(linkBook)) {
-            fadeNav("bloqueado");
+            var titleSpan = navEl.children[0];
+            var title = titleSpan ? titleSpan.textContent.trim() : "";
+            setPendingUnlock(linkBook, title);
+            fadeNav("progreso");
             return;
           }
           fadeNav(gateId(targetId));
@@ -1718,11 +1776,6 @@ Para consultas sobre derechos: contactar al autor.</p>
           var cbar = document.getElementById("confirm-" + cancel.getAttribute("data-confirm-cancel"));
           if (cbar) cbar.classList.remove("is-open");
           return;
-        }
-        var locked = t.closest ? t.closest(".locked-row") : null;
-        if (locked) {
-          e.preventDefault();
-          fadeNav("bloqueado");
         }
       });
 
