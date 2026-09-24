@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Ignara · 0.24</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      --fg: #111; --muted: #666; --line: #e8e8e8;
+      --pad: max(1.25rem, env(safe-area-inset-left));
+      --pad-r: max(1.25rem, env(safe-area-inset-right));
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    html, body {
+      margin: 0; min-height: 100%; background: #fff; color: var(--fg);
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+    }
+    body {
+      min-height: 100dvh; display: flex; justify-content: center;
+      -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+    }
+    #app {
+      position: relative; width: min(100%, 28rem); min-height: 100dvh;
+      padding: max(1.75rem, env(safe-area-inset-top)) var(--pad) max(2.25rem, env(safe-area-inset-bottom)) var(--pad-r);
+      display: flex; flex-direction: column;
+    }
+    .screen { display: none; flex: 1; flex-direction: column; }
+    .screen:target { display: flex; }
+    html:not(:has(.screen:target)) #home { display: flex; }
+    .screen.is-active { display: flex; }
+    html:has(.screen:target) .screen.is-active:not(:target) { display: none; }
+    .center {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; gap: 1rem;
+    }
+    h1, h2, p { margin: 0; font-weight: 400; }
+    h2 { font-size: 1rem; letter-spacing: 0.04em; margin-bottom: 1.15rem; }
+    .muted { color: var(--muted); font-size: 0.875rem; letter-spacing: 0.02em; }
+    .intro { color: var(--muted); margin: 0 0 1.85rem; max-width: 38ch; font-size: 0.9375rem; }
+    a {
+      color: inherit; text-decoration: none; -webkit-user-select: none; user-select: none;
+      touch-action: manipulation;
+    }
+    .back:active, .list a:active, #boot-hit:active { opacity: 0.7; }
+    .nav { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.85rem; min-height: 2.75rem; }
+    .back {
+      color: var(--muted); font-size: 0.8125rem; letter-spacing: 0.03em;
+      padding: 0.65rem 0; min-height: 2.75rem; display: inline-flex; align-items: center;
+    }
+    .list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+    .list a {
+      padding: 1.1rem 0; min-height: 3rem; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    }
+    .arrow { color: var(--muted); font-size: 0.875rem; flex-shrink: 0; }
+    .body { color: var(--fg); max-width: 38ch; white-space: pre-wrap; font-size: 0.9375rem; }
+    .tag {
+      display: inline-block; margin-top: 1.75rem; color: var(--muted);
+      font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    #boot-hit {
+      border: none; background: none; padding: 0; margin: 0;
+      width: min(72vw, 16rem); aspect-ratio: 497 / 152;
+      display: block; cursor: pointer; touch-action: manipulation;
+    }
+    #boot-canvas, #stage-canvas { width: 100%; height: 100%; display: block; }
+    #boot-gyro {
+      margin-top: 0.35rem; border: 1px solid var(--line); background: #fff;
+      color: var(--muted); font: inherit; font-size: 0.75rem; letter-spacing: 0.03em;
+      padding: 0.55rem 0.85rem; min-height: 2.5rem; border-radius: 0;
+      cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    #boot-gyro:active { opacity: 0.7; }
+    #boot-gyro.is-on { color: var(--fg); border-color: #ccc; }
+    #boot-gyro[hidden] { display: none; }
+    #stage-wrap {
+      width: min(72vw, 16rem); aspect-ratio: 497 / 152; margin: 2rem auto 0;
+    }
+    .tm {
+      font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em;
+      align-self: flex-end; margin: -0.35rem 0.15rem 0 0;
+    }
+    #fx {
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: none;
+    }
+    #fx.is-on { display: block; pointer-events: auto; }
+    #fx-layer { position: absolute; inset: 0; background: #fff; }
+
+    .row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: 1rem; padding: 0.85rem 0; border-bottom: 1px solid var(--line);
+      font-size: 0.9375rem;
+    }
+    .row:first-of-type { border-top: 1px solid var(--line); }
+    .row .k {
+      color: var(--muted); font-size: 0.75rem; letter-spacing: 0.06em;
+      text-transform: uppercase; flex-shrink: 0; max-width: 42%;
+    }
+    .row .v { text-align: right; max-width: 58%; }
+    .group-label {
+      margin: 1.5rem 0 0.35rem; padding-top: 0.35rem;
+      color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .group-label:first-child { margin-top: 0; }
+    .badge {
+      display: inline-block; color: var(--muted); font-size: 0.6875rem;
+      letter-spacing: 0.05em; text-transform: uppercase; flex-shrink: 0;
+    }
+    .list a .meta {
+      display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0;
+    }
+    .lock-ico {
+      width: 12px; height: 14px; flex-shrink: 0; display: block;
+    }
+    .list a.is-locked {
+      pointer-events: auto; color: var(--muted); cursor: pointer;
+    }
+    .list a.is-locked:active { opacity: 0.7; }
+    .unlock-banner {
+      margin: 0 0 1.1rem; padding: 0.85rem 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      font-size: 0.875rem; color: var(--fg);
+    }
+    .unlock-banner[hidden] { display: none !important; }
+    .toggle-row.is-hint {
+      outline: 1px solid #bbb; outline-offset: 2px;
+    }
+    .toggle-row {
+      padding: 1.1rem 0; min-height: 3.25rem; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    .toggle-row .name { font-size: 0.9375rem; }
+    .toggle-btn {
+      border: 1px solid var(--line); background: #fff; color: var(--muted);
+      font: inherit; font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 0.55rem 0.85rem; min-height: 2.5rem; min-width: 6.5rem;
+      cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .toggle-btn:active { opacity: 0.7; }
+    .toggle-btn.is-on { color: var(--fg); border-color: #bbb; }
+    .confirm-bar {
+      display: none; margin: 0.75rem 0 0; padding: 0.85rem 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      flex-direction: column; gap: 0.75rem;
+    }
+    .confirm-bar.is-open { display: flex; }
+    .confirm-bar p { font-size: 0.875rem; color: var(--fg); }
+    .confirm-actions { display: flex; gap: 0.65rem; }
+    .confirm-actions button {
+      border: 1px solid var(--line); background: #fff; color: var(--fg);
+      font: inherit; font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 0.55rem 0.85rem; min-height: 2.5rem; flex: 1;
+      cursor: pointer; touch-action: manipulation;
+    }
+    .confirm-actions button:active { opacity: 0.7; }
+    .confirm-actions .ghost { color: var(--muted); }
+
+    /* Codex rail — top horizontal tick bar (phone-first, Aristide-inspired) */
+    #codex-rail {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: calc(var(--rail-h, 1.35rem) + env(safe-area-inset-top));
+      z-index: 50;
+      display: none;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      padding:
+        env(safe-area-inset-top)
+        max(0.65rem, env(safe-area-inset-right))
+        0
+        max(0.65rem, env(safe-area-inset-left));
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    #codex-rail::-webkit-scrollbar { display: none; }
+    body.has-codex-rail {
+      --rail-h: 1.35rem;
+    }
+    body.has-codex-rail #codex-rail { display: flex; }
+    body.has-codex-rail #app {
+      padding-top: calc(var(--rail-h) + env(safe-area-inset-top) + 1.15rem);
+    }
+    #codex-rail .rail-gap {
+      flex-shrink: 0;
+      width: 0.55rem;
+      height: 100%;
+      pointer-events: none;
+    }
+    #codex-rail .rail-gap.is-section {
+      width: 0.95rem;
+    }
+    #codex-rail a.rail-item {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1rem;
+      height: 1.35rem;
+      margin: 0;
+      padding: 0;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    #codex-rail a.rail-item:active { opacity: 0.55; }
+    #codex-rail a.rail-item .rail-tick {
+      display: block;
+      width: 1px;
+      height: 0.42rem;
+      background: #c4c4c4;
+      border-radius: 0;
+      transition:
+        width 0.18s ease,
+        height 0.18s ease,
+        background-color 0.15s ease,
+        transform 0.18s ease;
+      transform-origin: center center;
+    }
+    #codex-rail a.rail-item.is-locked .rail-tick {
+      background: #d6d6d6;
+    }
+    #codex-rail a.rail-item.is-current {
+      width: 1.35rem;
+    }
+    #codex-rail a.rail-item.is-current .rail-tick {
+      width: 2.5px;
+      height: 0.95rem;
+      background: var(--fg);
+    }
+  </style>
+</head>
+<body>
+  <div id="fx" aria-hidden="true"><div id="fx-layer"></div></div>
+  <nav id="codex-rail" aria-label="Progreso del códex" hidden></nav>
+  <div id="app">
+    <section class="screen" id="home">
+      <div class="center">
+        <button type="button" id="boot-hit" aria-label="Abrir Ignara">
+          <canvas id="boot-canvas" width="497" height="152"></canvas>
+        </button>
+        <span class="tm">™</span>
+        <span class="muted">versión 0.24 · tocar para entrar</span>
+        <button type="button" id="boot-gyro" hidden>Activar inclinación</button>
+      </div>
+    </section>
+
+    <section class="screen" id="hub">
+      <div class="nav"><a class="back" href="#home" data-nav data-fx="fade">← inicio</a></div>
+      <h2>Archivo</h2>
+      <p class="intro">Recopilación mínima del mundo de Ignara.</p>
+      <div class="list">
+        <a href="#character-sheets" data-nav data-fx="fade"><span>Character sheets</span><span class="arrow">→</span></a>
+        <a href="#places" data-nav data-fx="fade"><span>Places</span><span class="arrow">→</span></a>
+        <a href="#progreso" data-nav data-fx="fade"><span>Progreso</span><span class="arrow">→</span></a>
+        <a href="#boot-tests" data-nav data-fx="fade"><span>Pruebas de portada</span><span class="arrow">→</span></a>
+        <a href="#propiedad" data-nav data-fx="fade"><span>Propiedad</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="character-sheets">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Character sheets</h2>
+      <p class="group-label">Ignara 1</p>
+      <div class="list">
+        <a href="#char-sam" data-nav data-fx="fade" data-book="1"><span>Sam</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#char-mila" data-nav data-fx="fade" data-book="1"><span>Mila</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#char-kai" data-nav data-fx="fade" data-book="1"><span>Kai</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#char-tess" data-nav data-fx="fade" data-book="1"><span>Tess</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#char-sakura" data-nav data-fx="fade" data-book="1"><span>Sakura</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#char-devon" data-nav data-fx="fade" data-book="1"><span>Devon</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#char-becca" data-nav data-fx="fade" data-book="1"><span>Becca</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+      </div>
+      <p class="group-label">Ignara 2</p>
+      <div class="list">
+        <a href="#char-kai-l2" data-nav data-fx="fade" data-book="2"><span>Kai</span><span class="meta"><span class="badge">Ignara 2</span><span class="arrow">→</span></span></a>
+      </div>
+      <p class="group-label">Ignara 3</p>
+      <div class="list">
+        <a href="#char-jess" data-nav data-fx="fade" data-book="3"><span>Jess</span><span class="meta"><span class="badge">Ignara 3</span><span class="arrow">→</span></span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="char-sam" data-book="1">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Sam</h2>
+      <div class="row"><span class="k">Gusto</span><span class="v">Pizza (textura universitario)</span></div>
+      <div class="row"><span class="k">Paradas</span><span class="v">En gasolinera puede elegir pizza</span></div>
+      <div class="row"><span class="k">Ropa / música</span><span class="v">Pendiente</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="char-mila" data-book="1">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Mila</h2>
+      <div class="row"><span class="k">Visual L1</span><span class="v">Pelo azul al inicio; look herido (maquillaje corrido)</span></div>
+      <div class="row"><span class="k">Otra imagen</span><span class="v">Póster: rubia, camisetas oversize, mangas abajo, botas plataforma (chelsea o Chuck), thigh highs</span></div>
+      <div class="row"><span class="k">Auto del grupo</span><span class="v">Stickers, basura universitaria, pelea por el cable AUX</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="char-kai" data-book="1">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Kai</h2>
+      <div class="row"><span class="k">L1</span><span class="v">Gym / boxeador</span></div>
+      <div class="row"><span class="k">Pelo</span><span class="v">Largo rubio</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="char-tess" data-book="1">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Tess</h2>
+      <div class="row"><span class="k">Perfil</span><span class="v">Cowgirl brasileña</span></div>
+      <div class="row"><span class="k">Lugar</span><span class="v">Pueblo western</span></div>
+      <div class="row"><span class="k">Encuentro</span><span class="v">Biblioteca local</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="char-sakura" data-book="1">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Sakura</h2>
+      <div class="row"><span class="k">Oficio</span><span class="v">Diseñadora / fotógrafa</span></div>
+      <div class="row"><span class="k">Cámara</span><span class="v">Film análoga</span></div>
+      <div class="row"><span class="k">Textura</span><span class="v">Katanas / sables (mención)</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="char-devon" data-book="1">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Devon</h2>
+      <div class="row"><span class="k">Rol</span><span class="v">Va «adelante» en la organización</span></div>
+      <div class="row"><span class="k">Look</span><span class="v">No look de calle</span></div>
+      <div class="row"><span class="k">Flor de Komodo</span><span class="v">No consume</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="char-becca" data-book="1">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Becca</h2>
+      <div class="row"><span class="k">Casa</span><span class="v">Costa</span></div>
+      <div class="row"><span class="k">Pasado</span><span class="v">Lifeguard</span></div>
+      <div class="row"><span class="k">Escena</span><span class="v">Porche / playa</span></div>
+      <div class="row"><span class="k">Objeto</span><span class="v">Binoculares</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="char-kai-l2" data-book="2">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Kai</h2>
+      <div class="row"><span class="k">Pelo</span><span class="v">Rapado</span></div>
+      <div class="row"><span class="k">Marca</span><span class="v">Flor de Komodo en el cráneo; pocas marcas legibles</span></div>
+      <div class="row"><span class="k">Hábitat</span><span class="v">Ring ilegal</span></div>
+      <span class="tag">Ignara 2</span>
+    </section>
+
+    <section class="screen" id="char-jess" data-book="3">
+      <div class="nav"><a class="back" href="#character-sheets" data-nav data-fx="fade">← character sheets</a></div>
+      <h2>Jess</h2>
+      <div class="row"><span class="k">Perfil</span><span class="v">Élite financiera</span></div>
+      <div class="row"><span class="k">Temperatura</span><span class="v">Calor de salón (risa, trago) vs hielo de dinero</span></div>
+      <div class="row"><span class="k">Calle</span><span class="v">Jess / Jez</span></div>
+      <div class="row"><span class="k">Ropa</span><span class="v">Pendiente</span></div>
+      <span class="tag">Ignara 3</span>
+    </section>
+
+    <section class="screen" id="places">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Places</h2>
+      <p class="group-label">Ignara 1</p>
+      <div class="list">
+        <a href="#place-pueblo" data-nav data-fx="fade" data-book="1"><span>Pueblo western</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-desierto" data-nav data-fx="fade" data-book="1"><span>Desierto del Polvo Blanco</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-dunas" data-nav data-fx="fade" data-book="1"><span>Dunas blancas con lagunas</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-templo" data-nav data-fx="fade" data-book="1"><span>Templo del Río de Cristal</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-taiga" data-nav data-fx="fade" data-book="1"><span>Taiga (Altai)</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-costa-becca" data-nav data-fx="fade" data-book="1"><span>Costa de Becca</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-arena-negra" data-nav data-fx="fade" data-book="1"><span>Playa de arena negra</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-praderas" data-nav data-fx="fade" data-book="1"><span>Praderas / rally</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+        <a href="#place-costa-tropical" data-nav data-fx="fade" data-book="1"><span>Costa tropical</span><span class="meta"><span class="badge">Ignara 1</span><span class="arrow">→</span></span></a>
+      </div>
+      <p class="group-label">Ignara 2</p>
+      <div class="list">
+        <a href="#place-komodo" data-nav data-fx="fade" data-book="2"><span>Komodo nocturno</span><span class="meta"><span class="badge">Ignara 2</span><span class="arrow">→</span></span></a>
+        <a href="#place-ring" data-nav data-fx="fade" data-book="2"><span>Ring clandestino</span><span class="meta"><span class="badge">Ignara 2</span><span class="arrow">→</span></span></a>
+        <a href="#place-rave" data-nav data-fx="fade" data-book="2"><span>Rave / club de ruido</span><span class="meta"><span class="badge">Ignara 2</span><span class="arrow">→</span></span></a>
+        <a href="#place-flor" data-nav data-fx="fade" data-book="2"><span>Flor de Komodo</span><span class="meta"><span class="badge">Ignara 2</span><span class="arrow">→</span></span></a>
+      </div>
+      <p class="group-label">Ignara 3</p>
+      <div class="list">
+        <a href="#place-casino" data-nav data-fx="fade" data-book="3"><span>Casino de alto voltaje</span><span class="meta"><span class="badge">Ignara 3</span><span class="arrow">→</span></span></a>
+        <a href="#place-yate" data-nav data-fx="fade" data-book="3"><span>Yate / catamarán</span><span class="meta"><span class="badge">Ignara 3</span><span class="arrow">→</span></span></a>
+        <a href="#place-circuito" data-nav data-fx="fade" data-book="3"><span>Circuito / GP de élite</span><span class="meta"><span class="badge">Ignara 3</span><span class="arrow">→</span></span></a>
+        <a href="#place-nieve" data-nav data-fx="fade" data-book="3"><span>Nieve / lujo invernal</span><span class="meta"><span class="badge">Ignara 3</span><span class="arrow">→</span></span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="place-pueblo" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Pueblo western</h2>
+      <div class="row"><span class="k">Textura</span><span class="v">Tradición + tech ligera</span></div>
+      <div class="row"><span class="k">Calles</span><span class="v">Tren a vapor, caballos</span></div>
+      <div class="row"><span class="k">Biblioteca</span><span class="v">Tipo saloon western</span></div>
+      <div class="row"><span class="k">Comida</span><span class="v">Posible comida local</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="place-desierto" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Desierto del Polvo Blanco</h2>
+      <div class="row"><span class="k">Clima</span><span class="v">Calor, polvo, exposición</span></div>
+      <div class="row"><span class="k">Tránsito</span><span class="v">Vehículos abiertos / caballos</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="place-dunas" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Dunas blancas con lagunas</h2>
+      <div class="row"><span class="k">Referente</span><span class="v">Lençóis Maranhenses</span></div>
+      <div class="row"><span class="k">Visual</span><span class="v">Cuarzo blanco, lagunas turquesa</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="place-templo" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Templo del Río de Cristal</h2>
+      <div class="row"><span class="k">Río</span><span class="v">Turquesa; canoas</span></div>
+      <div class="row"><span class="k">Templo</span><span class="v">Antiguo, semi-comido por la selva</span></div>
+      <div class="row"><span class="k">Recámaras</span><span class="v">Tres</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="place-taiga" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Taiga (Altai)</h2>
+      <div class="row"><span class="k">Paisaje</span><span class="v">Pinos, río, lago, montaña</span></div>
+      <div class="row"><span class="k">Textura</span><span class="v">Juventud (gasolinera, sobras)</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="place-costa-becca" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Costa de Becca</h2>
+      <div class="row"><span class="k">Escena</span><span class="v">Playa / porche</span></div>
+      <div class="row"><span class="k">Viaje</span><span class="v">Cerca de la jungla del templo</span></div>
+      <span class="tag">Ignara 1</span>
+    </section>
+
+    <section class="screen" id="place-arena-negra" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Playa de arena negra</h2>
+      <p class="body">Bioluminiscente.</p>
+      <span class="tag">Ignara 1 · stub</span>
+    </section>
+
+    <section class="screen" id="place-praderas" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Praderas / rally</h2>
+      <p class="body">Rally de tierra.</p>
+      <span class="tag">Ignara 1 · stub</span>
+    </section>
+
+    <section class="screen" id="place-costa-tropical" data-book="1">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Costa tropical</h2>
+      <p class="body">Youth-summer.</p>
+      <span class="tag">Ignara 1 · stub</span>
+    </section>
+
+    <section class="screen" id="place-komodo" data-book="2">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Komodo nocturno</h2>
+      <div class="row"><span class="k">Noche</span><span class="v">Neón, lluvia, pavimento mojado</span></div>
+      <div class="row"><span class="k">Comida</span><span class="v">Locales asiáticos</span></div>
+      <div class="row"><span class="k">Calle</span><span class="v">Motos; cybermods raras</span></div>
+      <span class="tag">Ignara 2</span>
+    </section>
+
+    <section class="screen" id="place-ring" data-book="2">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Ring clandestino</h2>
+      <div class="row"><span class="k">Espacio</span><span class="v">Sótano</span></div>
+      <div class="row"><span class="k">Ambiente</span><span class="v">Apuestas, sudor</span></div>
+      <span class="tag">Ignara 2</span>
+    </section>
+
+    <section class="screen" id="place-rave" data-book="2">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Rave / club de ruido</h2>
+      <div class="row"><span class="k">Luces</span><span class="v">Sí</span></div>
+      <div class="row"><span class="k">Música</span><span class="v">Impide hablar</span></div>
+      <span class="tag">Ignara 2</span>
+    </section>
+
+    <section class="screen" id="place-flor" data-book="2">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Flor de Komodo</h2>
+      <div class="row"><span class="k">Uso</span><span class="v">Se come, fuma o bebe</span></div>
+      <div class="row"><span class="k">Formas</span><span class="v">Tatuaje, trago, pin</span></div>
+      <div class="row"><span class="k">Nombre</span><span class="v">Propio abierto; «lirio» puede ser calle</span></div>
+      <span class="tag">Ignara 2 · objeto / marca</span>
+    </section>
+
+    <section class="screen" id="place-casino" data-book="3">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Casino de alto voltaje</h2>
+      <div class="row"><span class="k">Look</span><span class="v">Smoking, vestidos</span></div>
+      <div class="row"><span class="k">Mesa</span><span class="v">Fichas, champagne</span></div>
+      <span class="tag">Ignara 3</span>
+    </section>
+
+    <section class="screen" id="place-yate" data-book="3">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Yate / catamarán</h2>
+      <div class="row"><span class="k">Textura</span><span class="v">Lujo confinado</span></div>
+      <div class="row"><span class="k">Agua</span><span class="v">Wetsuits técnicos si hay agua</span></div>
+      <span class="tag">Ignara 3</span>
+    </section>
+
+    <section class="screen" id="place-circuito" data-book="3">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Circuito / GP de élite</h2>
+      <div class="row"><span class="k">Paddock</span><span class="v">Hospitalities</span></div>
+      <div class="row"><span class="k">Noche</span><span class="v">Afterparties</span></div>
+      <span class="tag">Ignara 3</span>
+    </section>
+
+    <section class="screen" id="place-nieve" data-book="3">
+      <div class="nav"><a class="back" href="#places" data-nav data-fx="fade">← places</a></div>
+      <h2>Nieve / lujo invernal</h2>
+      <p class="body">Textura L3 (no L1).</p>
+      <span class="tag">Ignara 3</span>
+    </section>
+
+    <section class="screen" id="progreso">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Progreso</h2>
+      <p class="intro">Marca los libros que ya terminaste. El archivo solo abre esas secciones.</p>
+      <div id="unlock-banner" class="unlock-banner" hidden data-unlock-banner>
+        <p id="unlock-banner-text"></p>
+      </div>
+      <div class="list" style="border-top: 1px solid var(--line);">
+        <div class="toggle-row" data-book-toggle="1">
+          <span class="name">Ignara 1</span>
+          <button type="button" class="toggle-btn" id="btn-book-1">Leído</button>
+        </div>
+        <div class="toggle-row" data-book-toggle="2">
+          <span class="name">Ignara 2</span>
+          <button type="button" class="toggle-btn" id="btn-book-2">Bloqueado</button>
+        </div>
+        <div class="confirm-bar" id="confirm-2" data-confirm-for="2">
+          <p>¿Ya terminaste Ignara 2?</p>
+          <div class="confirm-actions">
+            <button type="button" class="ghost" data-confirm-cancel="2">Cancelar</button>
+            <button type="button" data-confirm-ok="2">Sí, abrir</button>
+          </div>
+        </div>
+        <div class="toggle-row" data-book-toggle="3">
+          <span class="name">Ignara 3</span>
+          <button type="button" class="toggle-btn" id="btn-book-3">Bloqueado</button>
+        </div>
+        <div class="confirm-bar" id="confirm-3" data-confirm-for="3">
+          <p>¿Ya terminaste Ignara 3?</p>
+          <div class="confirm-actions">
+            <button type="button" class="ghost" data-confirm-cancel="3">Cancelar</button>
+            <button type="button" data-confirm-ok="3">Sí, abrir</button>
+          </div>
+        </div>
+      </div>
+      <span class="tag">libros leídos · local</span>
+    </section>
+
+    <section class="screen" id="bloqueado">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Bloqueado</h2>
+      <p class="body">Esta sección pide otro libro. Marca el progreso en Progreso cuando lo hayas terminado.</p>
+      <span class="tag">spoiler gate</span>
+    </section>
+
+    <section class="screen" id="boot-tests">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Pruebas de portada</h2>
+      <p class="intro">Doce entradas del wordmark (la principal ahora es inkDissolve: tinta negra 2D que se disuelve en arena/líquido hacia blanco, ~0.85s, sin zoom). Toca una para probar.</p>
+      <div class="list">
+        <a href="#boot-stage" data-boot="inkDissolve" data-label="Disuelve tinta"><span>1 · Disuelve tinta</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="metalGyro" data-label="Gold chrome gyro"><span>2 · Gold chrome gyro</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="asciiMorph" data-label="ASCII morph"><span>3 · ASCII morph</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="zoomDither" data-label="Zoom dither"><span>4 · Zoom dither</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="softFade" data-label="Soft fade"><span>5 · Soft fade</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="punch" data-label="Punch"><span>6 · Punch</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="rise" data-label="Rise"><span>7 · Rise</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="snapFlash" data-label="Snap flash"><span>8 · Snap flash</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="sink" data-label="Sink"><span>9 · Sink</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="slices" data-label="Slices"><span>10 · Slices</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="bloom" data-label="Bloom"><span>11 · Bloom</span><span class="arrow">→</span></a>
+        <a href="#boot-stage" data-boot="hardCut" data-label="Hard cut"><span>12 · Hard cut</span><span class="arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="screen" id="boot-stage">
+      <div class="nav"><a class="back" href="#boot-tests" data-nav data-fx="fade">← pruebas</a></div>
+      <p class="muted" id="stage-hint" style="text-align:center;">Preparando…</p>
+      <div id="stage-wrap"><canvas id="stage-canvas" width="497" height="152"></canvas></div>
+    </section>
+
+    <section class="screen" id="boot-result">
+      <div class="nav"><a class="back" href="#boot-tests" data-nav data-fx="fade">← pruebas</a></div>
+      <h2 id="boot-result-title">Portada</h2>
+      <p class="body" id="boot-result-body">Acabas de ver la animación de entrada.</p>
+      <span class="tag">demo portada</span>
+    </section>
+
+    <section class="screen" id="propiedad">
+      <div class="nav"><a class="back" href="#hub" data-nav data-fx="fade">← archivo</a></div>
+      <h2>Propiedad</h2>
+      <p class="body">Aviso de autoría y uso
+
+Ignara™, Ignara Lore Book y los textos, nombres, conceptos, wordmark y materiales publicados en este sitio son obra original de Julián, autor de la trilogía Ignara.
+
+© 2026 Julián. Todos los derechos reservados.
+
+Queda prohibida la reproducción, distribución, modificación o uso comercial de estos materiales sin autorización previa y por escrito del autor.
+
+Ignara™ y el wordmark asociados están protegidos como signos distintivos de la obra y su autor.
+
+Primera publicación pública de este lorebook: 2026, en https://thejulianbeck.github.io/ignara-lorebook/
+
+Para consultas sobre derechos: contactar al autor.</p>
+      <span class="tag">© · Ignara™</span>
+    </section>
+  </div>
+  <script>
+    (function () {
+      var fx = document.getElementById("fx");
+      var layer = document.getElementById("fx-layer");
+      var bootHit = document.getElementById("boot-hit");
+      var bootCanvas = document.getElementById("boot-canvas");
+      var bootCtx = bootCanvas.getContext("2d");
+      var stageCanvas = document.getElementById("stage-canvas");
+      var stageCtx = stageCanvas.getContext("2d");
+      var stageWrap = document.getElementById("stage-wrap");
+      var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
+      var busy = false;
+      var skipHash = false;
+      var logoImg = new Image();
+      var logoReady = false;
+      var pendingBoot = "inkDissolve";
+      var pendingLabel = "Disuelve tinta";
+      var defaultBoot = "inkDissolve";
+      var bootGyroBtn = document.getElementById("boot-gyro");
+      var metalIdleOn = false;
+      var metalRaf = 0;
+      var metalMask = null;
+      var metalMaskKey = "";
+      var lightTX = 0.35, lightTY = -0.45;
+      var lightX = 0.35, lightY = -0.45;
+      var gyroActive = false;
+      var gyroListening = false;
+      var metalEntering = false;
+      var metalBright = 0;
+      var metalBlur = 0;
+      var metalAlpha = 1;
+
+      var BAYER = [
+        [0,32,8,40,2,34,10,42],[48,16,56,24,50,18,58,26],
+        [12,44,4,36,14,46,6,38],[60,28,52,20,62,30,54,22],
+        [3,35,11,43,1,33,9,41],[51,19,59,27,49,17,57,25],
+        [15,47,7,39,13,45,5,37],[63,31,55,23,61,29,53,21]
+      ];
+
+      var inkMask = null;
+      var inkMaskKey = "";
+      var inkOutCanvas = null;
+      var inkOutCtx = null;
+      var INK_SCALE = 0.72;
+
+      function hashNoise(x, y) {
+        var n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+        return n - Math.floor(n);
+      }
+
+      function fadeSmooth(t) {
+        return t * t * (3 - 2 * t);
+      }
+
+      function valueNoise2(x, y) {
+        var x0 = Math.floor(x), y0 = Math.floor(y);
+        var fx = fadeSmooth(x - x0), fy = fadeSmooth(y - y0);
+        var a = hashNoise(x0, y0);
+        var b = hashNoise(x0 + 1, y0);
+        var c = hashNoise(x0, y0 + 1);
+        var d = hashNoise(x0 + 1, y0 + 1);
+        return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
+      }
+
+      function fbm2(x, y) {
+        var v = 0, a = 0.5, f = 1;
+        for (var o = 0; o < 3; o++) {
+          v += a * valueNoise2(x * f, y * f);
+          a *= 0.5;
+          f *= 2.03;
+        }
+        return v;
+      }
+
+      function ensureInkOut(pw, ph) {
+        if (!inkOutCanvas || inkOutCanvas.width !== pw || inkOutCanvas.height !== ph) {
+          inkOutCanvas = document.createElement("canvas");
+          inkOutCanvas.width = pw;
+          inkOutCanvas.height = ph;
+          inkOutCtx = inkOutCanvas.getContext("2d");
+        }
+      }
+
+      function buildInkMask(cssW, cssH, dpr) {
+        // Half-res dissolve buffer for iPhone smoothness (dpr already capped at 2)
+        var bufScale = 0.5;
+        var key = Math.round(cssW) + "x" + Math.round(cssH) + "@" + dpr.toFixed(2) + "h";
+        if (inkMask && inkMaskKey === key) return inkMask;
+        var lw = cssW * INK_SCALE, lh = cssH * INK_SCALE;
+        var x0 = (cssW - lw) / 2, y0 = (cssH - lh) / 2;
+        var pw = Math.max(1, Math.floor(cssW * dpr * bufScale));
+        var ph = Math.max(1, Math.floor(cssH * dpr * bufScale));
+        var off = document.createElement("canvas");
+        off.width = pw; off.height = ph;
+        var octx = off.getContext("2d");
+        octx.setTransform(1, 0, 0, 1, 0, 0);
+        octx.clearRect(0, 0, pw, ph);
+        octx.imageSmoothingEnabled = true;
+        octx.drawImage(logoImg, x0 * dpr * bufScale, y0 * dpr * bufScale, lw * dpr * bufScale, lh * dpr * bufScale);
+        var img = octx.getImageData(0, 0, pw, ph);
+        var data = img.data;
+        var n = pw * ph;
+        var alpha = new Float32Array(n);
+        var edge = new Float32Array(n);
+        var INF = 1e6;
+        var i, x, y;
+        for (i = 0; i < n; i++) {
+          alpha[i] = data[i * 4 + 3] / 255;
+          edge[i] = alpha[i] > 0.08 ? INF : 0;
+        }
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.08) { edge[i] = 0; continue; }
+            var best = edge[i];
+            if (x > 0) best = Math.min(best, edge[i - 1] + 1);
+            if (y > 0) best = Math.min(best, edge[i - pw] + 1);
+            if (x > 0 && y > 0) best = Math.min(best, edge[i - pw - 1] + 1.414);
+            if (x + 1 < pw && y > 0) best = Math.min(best, edge[i - pw + 1] + 1.414);
+            edge[i] = best;
+          }
+        }
+        for (y = ph - 1; y >= 0; y--) {
+          for (x = pw - 1; x >= 0; x--) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.08) { edge[i] = 0; continue; }
+            var best2 = edge[i];
+            if (x + 1 < pw) best2 = Math.min(best2, edge[i + 1] + 1);
+            if (y + 1 < ph) best2 = Math.min(best2, edge[i + pw] + 1);
+            if (x + 1 < pw && y + 1 < ph) best2 = Math.min(best2, edge[i + pw + 1] + 1.414);
+            if (x > 0 && y + 1 < ph) best2 = Math.min(best2, edge[i + pw - 1] + 1.414);
+            edge[i] = best2;
+          }
+        }
+        var maxE = 1;
+        for (i = 0; i < n; i++) if (edge[i] < INF && edge[i] > maxE) maxE = edge[i];
+        inkMask = {
+          pw: pw, ph: ph, alpha: alpha, edge: edge, maxE: maxE,
+          cssW: cssW, cssH: cssH, dpr: dpr, bufScale: bufScale
+        };
+        inkMaskKey = key;
+        return inkMask;
+      }
+
+      function sampleInkAlpha(mask, sx, sy, blurR) {
+        var pw = mask.pw, ph = mask.ph, alpha = mask.alpha;
+        var x = Math.round(sx), y = Math.round(sy);
+        if (blurR < 0.6) {
+          if (x < 0 || y < 0 || x >= pw || y >= ph) return 0;
+          return alpha[y * pw + x];
+        }
+        var r = Math.min(3, Math.ceil(blurR));
+        var sum = 0, wsum = 0;
+        var yy, xx, dy, dx, w, ix, iy;
+        for (dy = -r; dy <= r; dy++) {
+          iy = y + dy;
+          if (iy < 0 || iy >= ph) continue;
+          for (dx = -r; dx <= r; dx++) {
+            ix = x + dx;
+            if (ix < 0 || ix >= pw) continue;
+            w = 1 / (1 + dx * dx + dy * dy);
+            sum += alpha[iy * pw + ix] * w;
+            wsum += w;
+          }
+        }
+        return wsum > 0 ? sum / wsum : 0;
+      }
+
+      function drawInkSolid(ctx, canvas, host) {
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        var lw = size.w * INK_SCALE, lh = size.h * INK_SCALE;
+        var x = (size.w - lw) / 2, y = (size.h - lh) / 2;
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(logoImg, x, y, lw, lh);
+      }
+
+      function drawInkDissolve(ctx, canvas, host, progress) {
+        if (!logoReady) return;
+        progress = clamp01(progress);
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
+        var mask = buildInkMask(size.w, size.h, dpr);
+        var pw = mask.pw, ph = mask.ph;
+        ensureInkOut(pw, ph);
+        var out = inkOutCtx.createImageData(pw, ph);
+        var od = out.data;
+        // Threshold rises: edges (low edge dist) fail first → sand erosion from silhouette
+        var thresh = progress * 1.38;
+        var smear = progress * progress * 7.5; // liquid UV displacement (px in buf space)
+        var blurR = progress * 2.2; // gooey pre-threshold soften
+        var grain = 0.42 + progress * 0.22;
+        var i, x, y, a, eN, nSand, nLiq, sx, sy, keep, v, edgeBias;
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            // Mild Perlin-ish UV offset — stronger horizontally (liquid smear)
+            nLiq = fbm2(x * 0.055, y * 0.07 + progress * 2.4);
+            sx = x + (nLiq - 0.5) * smear * 1.35;
+            sy = y + (fbm2(x * 0.04 + 19.7, y * 0.05) - 0.5) * smear * 0.55;
+            a = sampleInkAlpha(mask, sx, sy, blurR);
+            if (a < 0.04) continue;
+            // Edge distance at source (approx)
+            var ix = Math.max(0, Math.min(pw - 1, Math.round(sx)));
+            var iy = Math.max(0, Math.min(ph - 1, Math.round(sy)));
+            eN = mask.edge[iy * pw + ix] / mask.maxE;
+            // Stochastic sand: hashed noise + Bayer-ish tertiary
+            nSand = hashNoise(x * 1.7 + 3.1, y * 1.9 + 7.3);
+            nSand = nSand * 0.72 + (BAYER[y & 7][x & 7] / 64) * 0.28;
+            edgeBias = 0.22 + 0.78 * eN; // interior holds longer
+            keep = a * edgeBias + (1 - nSand) * grain * 0.55;
+            // Extra edge freckle scatter late in dissolve
+            if (progress > 0.35 && eN < 0.35) {
+              keep -= (progress - 0.35) * 0.55 * nSand;
+            }
+            if (keep > thresh) {
+              v = i * 4;
+              // Thin ink: late frames go soft gray before vanish (not opacity-only fade)
+              var ink = 1;
+              if (progress > 0.55) {
+                ink = 1 - (progress - 0.55) / 0.45 * 0.35 * (1 - eN);
+              }
+              var g = Math.round(17 * ink);
+              od[v] = g; od[v + 1] = g; od[v + 2] = g;
+              od[v + 3] = Math.round(Math.min(1, a * 1.05) * 255);
+            }
+          }
+        }
+        inkOutCtx.putImageData(out, 0, 0);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(inkOutCanvas, 0, 0, canvas.width, canvas.height);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      async function runInkDissolveEnter(ctx, canvas, host, thenHash) {
+        stopMetalIdle();
+        var steps = 34; // ~850ms at 25ms
+        for (var i = 0; i <= steps; i++) {
+          var p = i / steps;
+          var e = easeOut(p);
+          drawInkDissolve(ctx, canvas, host, e);
+          await wait(25);
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+      }
+
+      function drawHomeIdle() {
+        if (defaultBoot === "metalGyro") {
+          bootGyroBtn.hidden = false;
+          startMetalIdle();
+        } else {
+          bootGyroBtn.hidden = true;
+          stopMetalIdle();
+          drawInkSolid(bootCtx, bootCanvas, bootHit);
+        }
+      }
+
+      function syncActive(id) {
+        screens.forEach(function (el) {
+          el.classList.toggle("is-active", el.id === id);
+        });
+        window.scrollTo(0, 0);
+        if (id === "progreso") {
+          showUnlockBannerIfNeeded();
+        } else {
+          hideUnlockBanner();
+        }
+        if (typeof updateCodexRail === "function") updateCodexRail(id);
+      }
+
+      function wait(ms) {
+        return new Promise(function (r) { setTimeout(r, ms); });
+      }
+
+      function easeOut(p) { return 1 - Math.pow(1 - p, 3); }
+
+      function tween(ms, apply) {
+        return new Promise(function (resolve) {
+          var t0 = null;
+          function frame(now) {
+            if (t0 === null) t0 = now;
+            var p = Math.min(1, (now - t0) / ms);
+            apply(easeOut(p), p);
+            if (p < 1) requestAnimationFrame(frame);
+            else resolve();
+          }
+          requestAnimationFrame(frame);
+        });
+      }
+
+      function sizeCanvas(canvas, ctx, host) {
+        var rect = host.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { w: rect.width, h: rect.height, dpr: dpr };
+      }
+
+      function drawSolid(ctx, canvas, host, scale, ox, oy, alpha) {
+        if (!logoReady) return;
+        ox = ox || 0; oy = oy || 0; alpha = alpha == null ? 1 : alpha;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        ctx.globalAlpha = alpha;
+        var lw = size.w * scale;
+        var lh = size.h * scale;
+        var x = (size.w - lw) / 2 + ox * size.w;
+        var y = (size.h - lh) / 2 + oy * size.h;
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(logoImg, x, y, lw, lh);
+        ctx.globalAlpha = 1;
+      }
+
+      function drawDither(ctx, canvas, host, scale, dissolve, ox, oy) {
+        if (!logoReady) return;
+        ox = ox || 0; oy = oy || 0;
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
+        var off = document.createElement("canvas");
+        off.width = canvas.width; off.height = canvas.height;
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, size.w, size.h);
+        var lw = size.w * scale;
+        var lh = size.h * scale;
+        var x = (size.w - lw) / 2 + ox * size.w;
+        var y = (size.h - lh) / 2 + oy * size.h;
+        octx.drawImage(logoImg, x, y, lw, lh);
+        var img = octx.getImageData(0, 0, off.width, off.height);
+        var data = img.data;
+        for (var py = 0; py < off.height; py++) {
+          for (var px = 0; px < off.width; px++) {
+            var i = (py * off.width + px) * 4;
+            if (data[i + 3] < 8) continue;
+            var thresh = (BAYER[py & 7][px & 7] + 0.5) / 64;
+            if (dissolve > thresh) data[i + 3] = 0;
+            else { data[i] = data[i+1] = data[i+2] = 0; data[i+3] = 255; }
+          }
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(img, 0, 0);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawSlices(ctx, canvas, host, scale, progress) {
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        ctx.clearRect(0, 0, size.w, size.h);
+        var bands = 10;
+        var lh = size.h * scale;
+        var lw = size.w * scale;
+        var x = (size.w - lw) / 2;
+        var y = (size.h - lh) / 2;
+        for (var b = 0; b < bands; b++) {
+          var local = Math.min(1, Math.max(0, (progress - b * 0.06) / 0.35));
+          if (local <= 0) continue;
+          var sy = (b / bands) * logoImg.height;
+          var sh = logoImg.height / bands;
+          var dy = y + (b / bands) * lh;
+          var dh = lh / bands;
+          var slide = (1 - local) * (b % 2 === 0 ? -40 : 40);
+          ctx.globalAlpha = local;
+          ctx.drawImage(logoImg, 0, sy, logoImg.width, sh, x + slide, dy, lw, dh);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+
+      function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+
+      // Gold chrome palette stops (deep bronze → amber → gold → hot white)
+      var GOLD_STOPS = [
+        [22, 10, 5],
+        [68, 30, 10],
+        [120, 62, 20],
+        [168, 98, 32],
+        [210, 148, 52],
+        [236, 196, 98],
+        [252, 236, 180],
+        [255, 252, 245]
+      ];
+
+      function sampleGold(t) {
+        t = clamp01(t);
+        var n = GOLD_STOPS.length - 1;
+        var x = t * n;
+        var i0 = Math.floor(x);
+        if (i0 >= n) return GOLD_STOPS[n];
+        var f = x - i0;
+        var a = GOLD_STOPS[i0], b = GOLD_STOPS[i0 + 1];
+        return [
+          a[0] + (b[0] - a[0]) * f,
+          a[1] + (b[1] - a[1]) * f,
+          a[2] + (b[2] - a[2]) * f
+        ];
+      }
+
+      var metalTintCanvas = null;
+      var metalTintCtx = null;
+      var metalFaceCanvas = null;
+      var metalFaceCtx = null;
+
+      function ensureMetalBuffers(pw, ph) {
+        if (!metalTintCanvas || metalTintCanvas.width !== pw || metalTintCanvas.height !== ph) {
+          metalTintCanvas = document.createElement("canvas");
+          metalTintCanvas.width = pw;
+          metalTintCanvas.height = ph;
+          metalTintCtx = metalTintCanvas.getContext("2d");
+          metalFaceCanvas = document.createElement("canvas");
+          metalFaceCanvas.width = pw;
+          metalFaceCanvas.height = ph;
+          metalFaceCtx = metalFaceCanvas.getContext("2d");
+        }
+      }
+
+      function buildMetalMask(cssW, cssH, dpr) {
+        var key = Math.round(cssW) + "x" + Math.round(cssH) + "@" + dpr.toFixed(2);
+        if (metalMask && metalMaskKey === key) return metalMask;
+        var scale = 0.72;
+        var lw = cssW * scale, lh = cssH * scale;
+        var x0 = (cssW - lw) / 2, y0 = (cssH - lh) / 2;
+        var pw = Math.max(1, Math.floor(cssW * dpr));
+        var ph = Math.max(1, Math.floor(cssH * dpr));
+        var off = document.createElement("canvas");
+        off.width = pw; off.height = ph;
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, cssW, cssH);
+        octx.drawImage(logoImg, x0, y0, lw, lh);
+        var img = octx.getImageData(0, 0, pw, ph);
+        var data = img.data;
+        var n = pw * ph;
+        var alpha = new Float32Array(n);
+        var edge = new Float32Array(n);
+        var nx = new Float32Array(n);
+        var ny = new Float32Array(n);
+        var nz = new Float32Array(n);
+        var INF = 1e6;
+        var i, x, y;
+        for (i = 0; i < n; i++) {
+          alpha[i] = data[i * 4 + 3] / 255;
+          edge[i] = alpha[i] > 0.06 ? INF : 0;
+        }
+        for (y = 0; y < ph; y++) {
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) { edge[i] = 0; continue; }
+            var best = edge[i];
+            if (x > 0) best = Math.min(best, edge[i - 1] + 1);
+            if (y > 0) best = Math.min(best, edge[i - pw] + 1);
+            if (x > 0 && y > 0) best = Math.min(best, edge[i - pw - 1] + 1.414);
+            if (x + 1 < pw && y > 0) best = Math.min(best, edge[i - pw + 1] + 1.414);
+            edge[i] = best;
+          }
+        }
+        for (y = ph - 1; y >= 0; y--) {
+          for (x = pw - 1; x >= 0; x--) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) { edge[i] = 0; continue; }
+            var best2 = edge[i];
+            if (x + 1 < pw) best2 = Math.min(best2, edge[i + 1] + 1);
+            if (y + 1 < ph) best2 = Math.min(best2, edge[i + pw] + 1);
+            if (x + 1 < pw && y + 1 < ph) best2 = Math.min(best2, edge[i + pw + 1] + 1.414);
+            if (x > 0 && y + 1 < ph) best2 = Math.min(best2, edge[i + pw - 1] + 1.414);
+            edge[i] = best2;
+          }
+        }
+        for (y = 1; y < ph - 1; y++) {
+          for (x = 1; x < pw - 1; x++) {
+            i = y * pw + x;
+            if (alpha[i] <= 0.06) continue;
+            var gx = edge[i + 1] - edge[i - 1];
+            var gy = edge[i + pw] - edge[i - pw];
+            // Stronger bevel / extrusion feel on normals
+            var bx = -gx, by = -gy, bz = 2.15;
+            var len = Math.sqrt(bx * bx + by * by + bz * bz) || 1;
+            nx[i] = bx / len;
+            ny[i] = by / len;
+            nz[i] = bz / len;
+          }
+        }
+        metalMask = {
+          pw: pw, ph: ph, alpha: alpha, edge: edge, nx: nx, ny: ny, nz: nz,
+          cssW: cssW, cssH: cssH, dpr: dpr, scale: scale, x0: x0, y0: y0, lw: lw, lh: lh
+        };
+        metalMaskKey = key;
+        return metalMask;
+      }
+
+      function bakeExtrusion(mask) {
+        if (mask.extrusion) return mask.extrusion;
+        var dpr = mask.dpr;
+        var layers = 8;
+        var dx = -0.6 * dpr;
+        var dy = 1.05 * dpr;
+        var c = document.createElement("canvas");
+        c.width = mask.pw; c.height = mask.ph;
+        var cctx = c.getContext("2d");
+        ensureMetalBuffers(mask.pw, mask.ph);
+        var tctx = metalTintCtx;
+        for (var i = layers; i >= 1; i--) {
+          var t = i / layers;
+          var col = sampleGold(0.06 + t * 0.2);
+          var ox = dx * i;
+          var oy = dy * i;
+          tctx.setTransform(1, 0, 0, 1, 0, 0);
+          tctx.clearRect(0, 0, mask.pw, mask.ph);
+          tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          tctx.drawImage(logoImg, mask.x0 + ox / dpr, mask.y0 + oy / dpr, mask.lw, mask.lh);
+          tctx.globalCompositeOperation = "source-in";
+          tctx.fillStyle = "rgb(" + (col[0] | 0) + "," + (col[1] | 0) + "," + (col[2] | 0) + ")";
+          tctx.fillRect(0, 0, mask.cssW, mask.cssH);
+          tctx.globalCompositeOperation = "source-over";
+          cctx.globalAlpha = 0.5 + t * 0.45;
+          cctx.drawImage(metalTintCanvas, 0, 0);
+        }
+        cctx.globalAlpha = 1;
+        mask.extrusion = c;
+        return c;
+      }
+
+      function drawStarGlint(ctx, cx, cy, intensity, dpr) {
+        if (intensity < 0.52) return;
+        var u = (intensity - 0.52) / 0.48;
+        u = clamp01(u);
+        var len = (10 + u * 34) * Math.max(0.85, dpr * 0.55);
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.globalCompositeOperation = "lighter";
+        var core = ctx.createRadialGradient(0, 0, 0, 0, 0, len * 0.4);
+        core.addColorStop(0, "rgba(255,255,255," + (0.95 * u).toFixed(3) + ")");
+        core.addColorStop(0.25, "rgba(255,236,180," + (0.55 * u).toFixed(3) + ")");
+        core.addColorStop(1, "rgba(255,180,60,0)");
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.arc(0, 0, len * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        function ray(ang, length, w, rgba) {
+          ctx.save();
+          ctx.rotate(ang);
+          var g = ctx.createLinearGradient(-length, 0, length, 0);
+          g.addColorStop(0, "rgba(255,255,255,0)");
+          g.addColorStop(0.45, rgba);
+          g.addColorStop(0.5, "rgba(255,255,255," + (0.9 * u).toFixed(3) + ")");
+          g.addColorStop(0.55, rgba);
+          g.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.fillStyle = g;
+          ctx.fillRect(-length, -w * 0.5, length * 2, w);
+          ctx.restore();
+        }
+        var w0 = Math.max(1, dpr * 0.85);
+        ray(0, len, w0, "rgba(255,250,230," + (0.55 * u).toFixed(3) + ")");
+        ray(Math.PI / 2, len * 0.92, w0, "rgba(255,250,230," + (0.5 * u).toFixed(3) + ")");
+        ray(Math.PI / 4, len * 0.62, w0 * 0.7, "rgba(255,200,220," + (0.28 * u).toFixed(3) + ")");
+        ray(-Math.PI / 4, len * 0.62, w0 * 0.7, "rgba(200,230,255," + (0.28 * u).toFixed(3) + ")");
+        ctx.restore();
+      }
+
+      function drawMetalLogo(ctx, canvas, host, bright, blurAmt, alphaMul) {
+        if (!logoReady) return;
+        bright = bright || 0;
+        blurAmt = blurAmt || 0;
+        alphaMul = alphaMul == null ? 1 : alphaMul;
+        var size = sizeCanvas(canvas, ctx, host);
+        var dpr = size.dpr;
+        var mask = buildMetalMask(size.w, size.h, dpr);
+        var pw = mask.pw, ph = mask.ph;
+        ensureMetalBuffers(pw, ph);
+        var out = metalFaceCtx.createImageData(pw, ph);
+        var od = out.data;
+        var lx = lightX, ly = lightY, lz = 0.78;
+        var llen = Math.sqrt(lx * lx + ly * ly + lz * lz) || 1;
+        lx /= llen; ly /= llen; lz /= llen;
+        var hx = lx, hy = ly, hz = lz + 1;
+        var hlen = Math.sqrt(hx * hx + hy * hy + hz * hz) || 1;
+        hx /= hlen; hy /= hlen; hz /= hlen;
+        var bevelR = 6.2 * dpr;
+        var i, x, y, a, ndot, shade, spec, edgeF, v, nh;
+        var glintX = 0, glintY = 0, glintBest = 0;
+        var invPh = 1 / Math.max(1, ph - 1);
+        for (y = 0; y < ph; y++) {
+          var yN = y * invPh;
+          for (x = 0; x < pw; x++) {
+            i = y * pw + x;
+            a = mask.alpha[i];
+            if (a < 0.06) continue;
+            var nnx = mask.nx[i], nny = mask.ny[i], nnz = mask.nz[i] || 1;
+            ndot = nnx * lx + nny * ly + nnz * lz;
+            ndot = clamp01(ndot);
+            edgeF = clamp01(mask.edge[i] / bevelR);
+            // Soft bevel rim + body shade
+            shade = 0.18 + 0.48 * ndot + 0.28 * (1 - edgeF) * (0.35 + 0.65 * ndot);
+            // Liquid chrome horizon: dark band across mid face
+            var env = 0.5 + 0.42 * nny + (yN - 0.48) * 0.55 + ly * 0.12 + lx * nnx * 0.08;
+            var band = env - 0.46;
+            var horizon = Math.exp(-band * band * 28) * 0.55;
+            // Sky (brighter) vs ground (warmer/darker)
+            var sky = clamp01(env);
+            shade = shade * (1 - horizon) + 0.07 * horizon;
+            shade = shade * (0.72 + 0.38 * sky);
+            nh = nnx * hx + nny * hy + nnz * hz;
+            nh = clamp01(nh);
+            // Sharp liquid specular + broader soft lobe
+            spec = Math.pow(nh, 42) * 1.15 + Math.pow(nh, 12) * 0.38 + Math.pow(nh, 4) * 0.1;
+            // Prefer glint on upper curves facing light
+            var glintScore = spec * (0.55 + 0.45 * clamp01(-nny + 0.15)) * (0.7 + 0.3 * (1 - yN));
+            if (glintScore > glintBest) {
+              glintBest = glintScore;
+              glintX = x;
+              glintY = y;
+            }
+            var tone = shade * 0.78 + spec * 0.95;
+            tone = clamp01(tone);
+            var rgb = sampleGold(tone);
+            // Hot specular push toward white-gold
+            if (spec > 0.35) {
+              var sw = clamp01((spec - 0.35) / 0.9);
+              rgb[0] = rgb[0] + (255 - rgb[0]) * sw;
+              rgb[1] = rgb[1] + (252 - rgb[1]) * sw;
+              rgb[2] = rgb[2] + (240 - rgb[2]) * sw * 0.92;
+            }
+            // Enter wash: toward warm white / hot
+            if (bright > 0) {
+              rgb[0] = rgb[0] * (1 - bright) + 255 * bright;
+              rgb[1] = rgb[1] * (1 - bright) + 250 * bright;
+              rgb[2] = rgb[2] * (1 - bright) + 240 * bright;
+            }
+            v = i * 4;
+            od[v] = rgb[0] < 0 ? 0 : (rgb[0] > 255 ? 255 : rgb[0]);
+            od[v + 1] = rgb[1] < 0 ? 0 : (rgb[1] > 255 ? 255 : rgb[1]);
+            od[v + 2] = rgb[2] < 0 ? 0 : (rgb[2] > 255 ? 255 : rgb[2]);
+            od[v + 3] = Math.round(a * alphaMul * 255);
+          }
+        }
+        metalFaceCtx.putImageData(out, 0, 0);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (blurAmt > 0.01) {
+          // Extrusion + face into tint buffer, then blur once
+          metalTintCtx.setTransform(1, 0, 0, 1, 0, 0);
+          metalTintCtx.clearRect(0, 0, pw, ph);
+          metalTintCtx.drawImage(bakeExtrusion(mask), 0, 0);
+          metalTintCtx.globalAlpha = 1;
+          metalTintCtx.drawImage(metalFaceCanvas, 0, 0);
+          if (bright < 0.85) drawStarGlint(metalTintCtx, glintX, glintY, glintBest * (1 - bright * 0.7), dpr);
+          ctx.save();
+          ctx.globalAlpha = alphaMul;
+          ctx.filter = "blur(" + (blurAmt * 10).toFixed(2) + "px)";
+          ctx.drawImage(metalTintCanvas, 0, 0);
+          ctx.filter = "none";
+          ctx.restore();
+        } else {
+          ctx.drawImage(bakeExtrusion(mask), 0, 0);
+          ctx.globalAlpha = 1;
+          ctx.drawImage(metalFaceCanvas, 0, 0);
+          if (bright < 0.85) drawStarGlint(ctx, glintX, glintY, glintBest * (1 - bright * 0.65), dpr);
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function metalIdleTick(now) {
+        if (!metalIdleOn) return;
+        metalRaf = requestAnimationFrame(metalIdleTick);
+        if (metalEntering) return;
+        // Lerp light toward target
+        lightX += (lightTX - lightX) * 0.12;
+        lightY += (lightTY - lightY) * 0.12;
+        if (!gyroActive) {
+          var t = (now || performance.now()) * 0.001;
+          lightTX = Math.sin(t * 0.55) * 0.55 + Math.sin(t * 0.23) * 0.15;
+          lightTY = Math.cos(t * 0.41) * 0.4 - 0.15;
+        }
+        if (document.getElementById("home").classList.contains("is-active")) {
+          drawMetalLogo(bootCtx, bootCanvas, bootHit, 0, 0, 1);
+        }
+      }
+
+      function startMetalIdle() {
+        if (metalIdleOn) return;
+        metalIdleOn = true;
+        metalEntering = false;
+        metalBright = 0;
+        metalBlur = 0;
+        metalAlpha = 1;
+        metalRaf = requestAnimationFrame(metalIdleTick);
+      }
+
+      function stopMetalIdle() {
+        metalIdleOn = false;
+        if (metalRaf) cancelAnimationFrame(metalRaf);
+        metalRaf = 0;
+      }
+
+      function onDeviceOrientation(e) {
+        if (!gyroActive) return;
+        var beta = e.beta;   // -180..180 front-back
+        var gamma = e.gamma; // -90..90 left-right
+        if (beta == null || gamma == null) return;
+        // gamma: left/right, beta: front/back — map gently into light dir
+        lightTX = Math.max(-1, Math.min(1, gamma / 40));
+        lightTY = Math.max(-1, Math.min(1, (45 - beta) / 40));
+      }
+
+      function attachGyroListener() {
+        if (gyroListening) return;
+        window.addEventListener("deviceorientation", onDeviceOrientation, true);
+        gyroListening = true;
+      }
+
+      async function enableGyroFromGesture() {
+        try {
+          if (typeof DeviceOrientationEvent !== "undefined" &&
+              typeof DeviceOrientationEvent.requestPermission === "function") {
+            var res = await DeviceOrientationEvent.requestPermission();
+            if (res !== "granted") {
+              bootGyroBtn.textContent = "Inclinación no disponible";
+              bootGyroBtn.disabled = true;
+              gyroActive = false;
+              return;
+            }
+          }
+          attachGyroListener();
+          gyroActive = true;
+          bootGyroBtn.textContent = "Inclinación activa";
+          bootGyroBtn.classList.add("is-on");
+          bootGyroBtn.disabled = true;
+        } catch (err) {
+          gyroActive = false;
+          bootGyroBtn.textContent = "Inclinación no disponible";
+          bootGyroBtn.disabled = true;
+        }
+      }
+
+      async function runMetalGyroEnter(ctx, canvas, host, thenHash) {
+        metalEntering = true;
+        stopMetalIdle();
+        var steps = 32; // ~800ms at 25ms
+        for (var i = 0; i <= steps; i++) {
+          var p = i / steps;
+          var e = easeOut(p);
+          // 0..0.55 brightness toward white; 0.4..1 soft dissolve/blur
+          var br = clamp01(e / 0.72);
+          var bl = p < 0.4 ? 0 : (p - 0.4) / 0.6;
+          var al = p < 0.45 ? 1 : 1 - (p - 0.45) / 0.55;
+          drawMetalLogo(ctx, canvas, host, br, bl * 0.9, clamp01(al));
+          await wait(25);
+        }
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        metalEntering = false;
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+        if (host === bootHit) {
+          // restore idle metal on home when returning later; for now after enter we are on hub
+        }
+      }
+
+      async function whiteGate(thenHash) {
+        fx.classList.add("is-on");
+        layer.style.opacity = "0";
+        await tween(90, function (e) { layer.style.opacity = String(e); });
+        skipHash = true;
+        location.hash = thenHash;
+        syncActive(thenHash);
+        skipHash = false;
+        await tween(110, function (e) { layer.style.opacity = String(1 - e); });
+        fx.classList.remove("is-on");
+        layer.style.opacity = "0";
+      }
+
+
+      function drawAsciiMorph(ctx, canvas, host, progress) {
+        // progress 0..1: center→out becomes ASCII, then center→out fades away
+        if (!logoReady) return;
+        var size = sizeCanvas(canvas, ctx, host);
+        var w = size.w, h = size.h, dpr = size.dpr;
+        var scale = 0.72;
+        var lw = w * scale, lh = h * scale;
+        var x0 = (w - lw) / 2, y0 = (h - lh) / 2;
+
+        var off = document.createElement("canvas");
+        off.width = Math.max(1, Math.floor(lw * dpr));
+        off.height = Math.max(1, Math.floor(lh * dpr));
+        var octx = off.getContext("2d");
+        octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        octx.clearRect(0, 0, lw, lh);
+        octx.drawImage(logoImg, 0, 0, lw, lh);
+        var sample = octx.getImageData(0, 0, off.width, off.height).data;
+
+        ctx.clearRect(0, 0, w, h);
+        var cell = 7;
+        var cols = Math.ceil(lw / cell);
+        var rows = Math.ceil(lh / cell);
+        var cx = cols / 2, cy = rows / 2;
+        var maxR = Math.sqrt(cx * cx + cy * cy) || 1;
+        var chars = " .:-=+*#%@";
+        ctx.font = "6px IBM Plex Mono, ui-monospace, monospace";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+
+        // phase: 0-0.55 convert solid→ascii from inside; 0.55-1 ascii→gone from inside
+        var convertP = Math.min(1, progress / 0.55);
+        var fadeP = progress < 0.55 ? 0 : (progress - 0.55) / 0.45;
+
+        for (var row = 0; row < rows; row++) {
+          for (var col = 0; col < cols; col++) {
+            var px = Math.min(off.width - 1, Math.floor((col + 0.5) / cols * off.width));
+            var py = Math.min(off.height - 1, Math.floor((row + 0.5) / rows * off.height));
+            var si = (py * off.width + px) * 4;
+            if (sample[si + 3] < 40) continue;
+
+            var dx = col - cx, dy = row - cy;
+            var r = Math.sqrt(dx * dx + dy * dy) / maxR;
+            var dxCss = x0 + (col + 0.5) * cell;
+            var dyCss = y0 + (row + 0.5) * cell;
+
+            if (r > convertP + 0.04) {
+              // still solid outer ring
+              ctx.fillStyle = "#111";
+              ctx.fillRect(dxCss - cell * 0.45, dyCss - cell * 0.45, cell * 0.9, cell * 0.9);
+              continue;
+            }
+            if (r > fadeP + 0.06 || fadeP <= 0) {
+              // ASCII region
+              var bright = 1 - (sample[si] / 255);
+              var ci = Math.min(chars.length - 1, Math.floor(bright * (chars.length - 1)));
+              ctx.fillStyle = "#111";
+              ctx.fillText(chars[ci], dxCss, dyCss);
+            }
+            // else gone (inner faded)
+          }
+        }
+      }
+
+      async function runBoot(kind, ctx, canvas, host, thenHash) {
+        var start = 0.42;
+        if (kind === "inkDissolve") {
+          await runInkDissolveEnter(ctx, canvas, host, thenHash);
+          return;
+        } else if (kind === "metalGyro") {
+          await runMetalGyroEnter(ctx, canvas, host, thenHash);
+          return;
+        } else if (kind === "asciiMorph") {
+          var steps = 30; // ~750ms at 25ms
+          for (var i = 0; i <= steps; i++) {
+            drawAsciiMorph(ctx, canvas, host, i / steps);
+            await wait(25);
+          }
+        } else if (kind === "zoomDither") {
+          var steps = 18;
+          for (var i = 0; i <= steps; i++) {
+            var p = i / steps;
+            var e = easeOut(p);
+            var scale = start + (2.2 - start) * e;
+            var dissolve = Math.max(0, (p - 0.2) / 0.8);
+            if (p < 0.22) drawSolid(ctx, canvas, host, scale, 0, 0, 1);
+            else drawDither(ctx, canvas, host, scale, dissolve, 0, 0);
+            await wait(14);
+          }
+        } else if (kind === "softFade") {
+          await tween(280, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.55, 0, 0, 1 - e);
+          });
+        } else if (kind === "punch") {
+          await tween(160, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 1.6, 0, 0, 1 - e * 0.85);
+          });
+        } else if (kind === "rise") {
+          await tween(260, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.3, 0, 0.35 * (1 - e), 1 - e);
+          });
+        } else if (kind === "snapFlash") {
+          drawSolid(ctx, canvas, host, start, 0, 0, 1);
+          await wait(60);
+          fx.classList.add("is-on");
+          layer.style.background = "#fff";
+          layer.style.opacity = "1";
+          await wait(50);
+        } else if (kind === "sink") {
+          await tween(260, function (e) {
+            drawSolid(ctx, canvas, host, start * (1 - e * 0.7), 0, e * 0.08, 1 - e);
+          });
+        } else if (kind === "slices") {
+          for (var s = 0; s <= 16; s++) {
+            drawSlices(ctx, canvas, host, start, s / 16);
+            await wait(16);
+          }
+          await tween(120, function (e) {
+            drawSlices(ctx, canvas, host, start + e * 0.4, 1);
+            ctx.globalAlpha = 1 - e;
+          });
+          ctx.globalAlpha = 1;
+        } else if (kind === "bloom") {
+          await tween(240, function (e) {
+            drawSolid(ctx, canvas, host, start + e * 0.9, 0, 0, 1 - e);
+            if (e > 0.4) {
+              fx.classList.add("is-on");
+              layer.style.opacity = String((e - 0.4) / 0.6 * 0.85);
+            }
+          });
+        } else if (kind === "hardCut") {
+          drawSolid(ctx, canvas, host, start, 0, 0, 1);
+          await wait(40);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          await wait(30);
+        } else if (kind === "drift") {
+          await tween(240, function (e) {
+            drawSolid(ctx, canvas, host, start, 0, -e * 0.55, 1 - e);
+          });
+        } else {
+          await tween(200, function (e) {
+            drawSolid(ctx, canvas, host, start + e, 0, 0, 1 - e);
+          });
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        await whiteGate(thenHash);
+        if (thenHash === "boot-result") {
+          document.getElementById("boot-result-title").textContent = pendingLabel;
+          document.getElementById("boot-result-body").textContent =
+            "Acabas de ver \"" + pendingLabel + "\". Vuelve a Pruebas de portada para comparar.";
+        }
+        if (host === bootHit) {
+          drawHomeIdle();
+        }
+      }
+
+      async function bootOpen() {
+        if (busy) return;
+        busy = true;
+        try {
+          await runBoot(defaultBoot, bootCtx, bootCanvas, bootHit, "hub");
+        } finally {
+          busy = false;
+        }
+      }
+
+      async function runStageBoot() {
+        if (busy) return;
+        busy = true;
+        document.getElementById("stage-hint").textContent = pendingLabel + "…";
+        try {
+          if (pendingBoot === "metalGyro") drawMetalLogo(stageCtx, stageCanvas, stageWrap, 0, 0, 1);
+          else if (pendingBoot === "inkDissolve") drawInkSolid(stageCtx, stageCanvas, stageWrap);
+          else drawSolid(stageCtx, stageCanvas, stageWrap, 0.42, 0, 0, 1);
+          await wait(120);
+          await runBoot(pendingBoot, stageCtx, stageCanvas, stageWrap, "boot-result");
+        } finally {
+          busy = false;
+          document.getElementById("stage-hint").textContent = "";
+        }
+      }
+
+      async function fadeNav(toId) {
+        if (busy) return;
+        var to = document.getElementById(toId);
+        if (!to) return;
+        var from =
+          document.querySelector(".screen.is-active") ||
+          document.querySelector(".screen:target") ||
+          document.getElementById("home");
+        if (from && from.id === toId) return;
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          skipHash = true;
+          location.hash = toId;
+          syncActive(toId);
+          skipHash = false;
+          if (toId === "home") drawHomeIdle();
+          if (toId === "boot-stage") runStageBoot();
+          return;
+        }
+
+        busy = true;
+        try {
+          if (from && from.id === "home") stopMetalIdle();
+          fx.classList.add("is-on");
+          layer.style.background = "#fff";
+          layer.style.opacity = "0";
+          await tween(120, function (e) { layer.style.opacity = String(e); });
+          skipHash = true;
+          location.hash = toId;
+          syncActive(toId);
+          skipHash = false;
+          if (toId === "home") drawHomeIdle();
+          await tween(120, function (e) { layer.style.opacity = String(1 - e); });
+          fx.classList.remove("is-on");
+          if (toId === "boot-stage") {
+            busy = false;
+            await runStageBoot();
+            return;
+          }
+        } finally {
+          busy = false;
+        }
+      }
+
+      bootHit.addEventListener("click", function (e) {
+        e.preventDefault();
+        bootOpen();
+      });
+
+      var BOOKS_KEY = "ignara-codex-books";
+      var booksState = { "1": true, "2": false, "3": false };
+      var pendingUnlockBook = null;
+      var pendingUnlockTitle = "";
+      var LOCK_SVG =
+        '<svg class="lock-ico" width="12" height="14" viewBox="0 0 12 14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.25">' +
+        '<rect x="2" y="6" width="8" height="7" rx="0.5"/>' +
+        '<path d="M4 6V4.5a2 2 0 0 1 4 0V6"/>' +
+        "</svg>";
+
+
+      /* --- Codex rail (top horizontal tick bar) --- */
+      var RAIL_VIEWS = {
+        "character-sheets": true,
+        "places": true
+      };
+      var railEl = document.getElementById("codex-rail");
+      var railBuilt = false;
+
+      function isCodexEntryId(id) {
+        return id && (id.indexOf("char-") === 0 || id.indexOf("place-") === 0);
+      }
+
+      function shouldShowRail(id) {
+        if (!id) return false;
+        if (RAIL_VIEWS[id]) return true;
+        return isCodexEntryId(id);
+      }
+
+      function collectCodexEntries() {
+        var out = [];
+        function fromSection(sectionId, kind) {
+          var sec = document.getElementById(sectionId);
+          if (!sec) return;
+          var group = "";
+          Array.prototype.forEach.call(sec.children, function (node) {
+            if (node.classList && node.classList.contains("group-label")) {
+              group = (node.textContent || "").trim();
+              return;
+            }
+            if (!(node.classList && node.classList.contains("list"))) return;
+            Array.prototype.forEach.call(node.querySelectorAll("a[data-book][data-nav]"), function (a) {
+              var href = a.getAttribute("href") || "";
+              if (href.charAt(0) !== "#") return;
+              var id = href.slice(1);
+              var titleSpan = a.children[0];
+              var title = titleSpan ? titleSpan.textContent.trim() : id;
+              out.push({
+                id: id,
+                book: a.getAttribute("data-book") || "",
+                title: title,
+                kind: kind,
+                group: group
+              });
+            });
+          });
+        }
+        fromSection("character-sheets", "char");
+        fromSection("places", "place");
+        return out;
+      }
+
+      function buildCodexRail() {
+        if (!railEl || railBuilt) return;
+        var entries = collectCodexEntries();
+        railEl.innerHTML = "";
+        var lastKind = "";
+        var lastGroup = "";
+        entries.forEach(function (e, idx) {
+          if (e.kind !== lastKind) {
+            if (idx > 0) {
+              var secGap = document.createElement("div");
+              secGap.className = "rail-gap is-section";
+              secGap.setAttribute("aria-hidden", "true");
+              railEl.appendChild(secGap);
+            }
+            lastKind = e.kind;
+            lastGroup = "";
+          } else if (e.group && e.group !== lastGroup) {
+            if (lastGroup) {
+              var gGap = document.createElement("div");
+              gGap.className = "rail-gap";
+              gGap.setAttribute("aria-hidden", "true");
+              railEl.appendChild(gGap);
+            }
+            lastGroup = e.group;
+          } else if (e.group && !lastGroup) {
+            lastGroup = e.group;
+          }
+          var a = document.createElement("a");
+          a.className = "rail-item";
+          a.href = "#" + e.id;
+          a.setAttribute("data-nav", "");
+          a.setAttribute("data-fx", "fade");
+          a.setAttribute("data-book", e.book);
+          a.setAttribute("data-rail-id", e.id);
+          a.setAttribute("title", e.title);
+          a.setAttribute("aria-label", e.title);
+          var tick = document.createElement("span");
+          tick.className = "rail-tick";
+          tick.setAttribute("aria-hidden", "true");
+          a.appendChild(tick);
+          railEl.appendChild(a);
+        });
+        railBuilt = true;
+        refreshRailLocks();
+      }
+
+      function refreshRailLocks() {
+        if (!railEl) return;
+        railEl.querySelectorAll("a.rail-item").forEach(function (a) {
+          var book = a.getAttribute("data-book");
+          var unlocked = isBookUnlocked(book);
+          if (!unlocked) {
+            a.classList.add("is-locked");
+          } else {
+            a.classList.remove("is-locked");
+          }
+        });
+      }
+
+      function updateCodexRail(id) {
+        if (!railEl) return;
+        buildCodexRail();
+        var show = shouldShowRail(id);
+        document.body.classList.toggle("has-codex-rail", show);
+        railEl.hidden = !show;
+        railEl.setAttribute("aria-hidden", show ? "false" : "true");
+        var currentId = isCodexEntryId(id) ? id : null;
+        railEl.querySelectorAll("a.rail-item").forEach(function (a) {
+          var on = currentId && a.getAttribute("data-rail-id") === currentId;
+          a.classList.toggle("is-current", !!on);
+          if (on) a.setAttribute("aria-current", "page");
+          else a.removeAttribute("aria-current");
+        });
+        if (show && currentId) {
+          var cur = railEl.querySelector('a.rail-item[data-rail-id="' + currentId + '"]');
+          if (cur && cur.scrollIntoView) {
+            try {
+              cur.scrollIntoView({ block: "nearest", inline: "center" });
+            } catch (err) {
+              cur.scrollIntoView(false);
+            }
+          }
+        }
+      }
+
+      function hideUnlockBanner() {
+        var banner = document.getElementById("unlock-banner");
+        if (banner) banner.hidden = true;
+        document.querySelectorAll(".toggle-row.is-hint").forEach(function (row) {
+          row.classList.remove("is-hint");
+        });
+        pendingUnlockBook = null;
+        pendingUnlockTitle = "";
+      }
+
+      function showUnlockBannerIfNeeded() {
+        var banner = document.getElementById("unlock-banner");
+        var text = document.getElementById("unlock-banner-text");
+        if (!banner || !text) return;
+        if (!pendingUnlockBook) return;
+        var n = String(pendingUnlockBook);
+        var title = (pendingUnlockTitle || "").replace(/\s*·\s*Ignara\s+\d+/i, "").trim();
+        if (title) {
+          text.textContent =
+            title + " pertenece a Ignara " + n +
+            ". Márcalo como leído abajo para abrirlo.";
+        } else {
+          text.textContent =
+            "Esta entrada es de Ignara " + n +
+            ". Márcala abajo cuando hayas terminado ese libro.";
+        }
+        banner.hidden = false;
+        document.querySelectorAll(".toggle-row.is-hint").forEach(function (row) {
+          row.classList.remove("is-hint");
+        });
+        var row = document.querySelector('.toggle-row[data-book-toggle="' + n + '"]');
+        if (row) row.classList.add("is-hint");
+        pendingUnlockTitle = "";
+      }
+
+      function setPendingUnlock(book, title) {
+        pendingUnlockBook = book ? String(book) : null;
+        pendingUnlockTitle = title || "";
+      }
+
+      function loadBooks() {
+        try {
+          var raw = localStorage.getItem(BOOKS_KEY);
+          if (!raw) return;
+          var parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            booksState["1"] = parsed["1"] !== false;
+            booksState["2"] = !!parsed["2"];
+            booksState["3"] = !!parsed["3"];
+          }
+        } catch (err) {}
+      }
+
+      function saveBooks() {
+        try {
+          localStorage.setItem(BOOKS_KEY, JSON.stringify(booksState));
+        } catch (err) {}
+      }
+
+      function isBookUnlocked(n) {
+        return !!booksState[String(n)];
+      }
+
+      function gateId(id) {
+        var el = document.getElementById(id);
+        if (!el) return "home";
+        var book = el.getAttribute("data-book");
+        if (book && !isBookUnlocked(book)) {
+          setPendingUnlock(book, el.querySelector("h2") ? el.querySelector("h2").textContent : "");
+          return "progreso";
+        }
+        return id;
+      }
+
+      function refreshBookToggles() {
+        [1, 2, 3].forEach(function (n) {
+          var btn = document.getElementById("btn-book-" + n);
+          if (!btn) return;
+          var on = isBookUnlocked(n);
+          btn.textContent = on ? "Leído" : "Bloqueado";
+          btn.classList.toggle("is-on", on);
+        });
+        document.querySelectorAll(".confirm-bar").forEach(function (bar) {
+          bar.classList.remove("is-open");
+        });
+      }
+
+      function applySpoilerGates() {
+        document.querySelectorAll(".locked-row").forEach(function (stub) {
+          if (stub.parentNode) stub.parentNode.removeChild(stub);
+        });
+        document.querySelectorAll("a[data-book][data-nav]").forEach(function (a) {
+          var book = a.getAttribute("data-book");
+          var unlocked = isBookUnlocked(book);
+          var meta = a.querySelector(".meta");
+          a.hidden = false;
+          a.removeAttribute("data-stubbed");
+          if (!meta) return;
+          var badge = meta.querySelector(".badge");
+          var badgeHtml = badge
+            ? badge.outerHTML
+            : ('<span class="badge">Ignara ' + book + "</span>");
+          if (!unlocked) {
+            a.classList.add("is-locked");
+            meta.innerHTML = badgeHtml + LOCK_SVG;
+          } else {
+            a.classList.remove("is-locked");
+            meta.innerHTML = badgeHtml + '<span class="arrow">→</span>';
+          }
+        });
+        if (typeof refreshRailLocks === "function") refreshRailLocks();
+      }
+
+      function setBook(n, on) {
+        booksState[String(n)] = !!on;
+        saveBooks();
+        refreshBookToggles();
+        applySpoilerGates();
+        if (on && pendingUnlockBook && String(n) === String(pendingUnlockBook)) {
+          pendingUnlockBook = null;
+          hideUnlockBanner();
+        }
+      }
+
+      loadBooks();
+      // ensure defaults persist
+      if (localStorage.getItem(BOOKS_KEY) == null) saveBooks();
+
+      function onAppNavClick(e) {
+        var t = e.target;
+        if (!t) return;
+        var bootEl = t.closest ? t.closest("[data-boot]") : null;
+        if (bootEl) {
+          e.preventDefault();
+          pendingBoot = bootEl.getAttribute("data-boot") || "zoomDither";
+          pendingLabel = bootEl.getAttribute("data-label") || pendingBoot;
+          fadeNav("boot-stage");
+          return;
+        }
+        var navEl = t.closest ? t.closest("a[data-nav]") : null;
+        if (navEl) {
+          var href = navEl.getAttribute("href") || "";
+          if (href.charAt(0) !== "#") return;
+          e.preventDefault();
+          var targetId = href.slice(1);
+          var linkBook = navEl.getAttribute("data-book");
+          if (linkBook && !isBookUnlocked(linkBook)) {
+            var title = navEl.getAttribute("aria-label") || navEl.getAttribute("title") || "";
+            if (!title) {
+              var titleSpan = navEl.children[0];
+              title = titleSpan ? titleSpan.textContent.trim() : "";
+            }
+            setPendingUnlock(linkBook, title);
+            fadeNav("progreso");
+            return;
+          }
+          fadeNav(gateId(targetId));
+          return;
+        }
+        var toggleBtn = t.closest ? t.closest("[data-book-toggle] .toggle-btn, .toggle-btn") : null;
+        if (toggleBtn && toggleBtn.id && toggleBtn.id.indexOf("btn-book-") === 0) {
+          e.preventDefault();
+          var bn = toggleBtn.id.replace("btn-book-", "");
+          if (isBookUnlocked(bn)) {
+            setBook(bn, false);
+            return;
+          }
+          if (bn === "1") {
+            setBook(bn, true);
+            return;
+          }
+          var bar = document.getElementById("confirm-" + bn);
+          document.querySelectorAll(".confirm-bar").forEach(function (b) {
+            if (b !== bar) b.classList.remove("is-open");
+          });
+          if (bar) bar.classList.add("is-open");
+          return;
+        }
+        var ok = t.closest ? t.closest("[data-confirm-ok]") : null;
+        if (ok) {
+          e.preventDefault();
+          setBook(ok.getAttribute("data-confirm-ok"), true);
+          return;
+        }
+        var cancel = t.closest ? t.closest("[data-confirm-cancel]") : null;
+        if (cancel) {
+          e.preventDefault();
+          var cbar = document.getElementById("confirm-" + cancel.getAttribute("data-confirm-cancel"));
+          if (cbar) cbar.classList.remove("is-open");
+          return;
+        }
+      }
+      document.getElementById("app").addEventListener("click", onAppNavClick);
+      if (railEl) railEl.addEventListener("click", onAppNavClick);
+
+      // Patch fadeNav to gate locked detail screens
+      var _fadeNav = fadeNav;
+      fadeNav = async function (toId) {
+        return _fadeNav(gateId(toId));
+      };
+
+      window.addEventListener("hashchange", function () {
+        if (skipHash) return;
+        var id = (location.hash || "#home").slice(1);
+        if (!document.getElementById(id)) id = "home";
+        id = gateId(id);
+        if (id !== (location.hash || "#home").slice(1)) {
+          skipHash = true;
+          location.hash = id;
+          skipHash = false;
+        }
+        syncActive(id);
+        if (id === "home") {
+          drawHomeIdle();
+        } else {
+          stopMetalIdle();
+        }
+      });
+
+      refreshBookToggles();
+      applySpoilerGates();
+
+      window.addEventListener("resize", function () {
+        if (document.getElementById("home").classList.contains("is-active")) {
+          metalMask = null;
+          metalMaskKey = "";
+          inkMask = null;
+          inkMaskKey = "";
+          if (defaultBoot === "metalGyro") drawMetalLogo(bootCtx, bootCanvas, bootHit, 0, 0, 1);
+          else drawInkSolid(bootCtx, bootCanvas, bootHit);
+        }
+      });
+
+      bootGyroBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        enableGyroFromGesture();
+      });
+
+      logoImg.onload = function () {
+        logoReady = true;
+        drawHomeIdle();
+      };
+      logoImg.src = "ignara-wordmark.svg";
+
+      var start = (location.hash || "#home").slice(1);
+      if (!document.getElementById(start)) start = "home";
+      start = gateId(start);
+      syncActive(start);
+      if (start !== "home") stopMetalIdle();
+      refreshBookToggles();
+      applySpoilerGates();
+    })();
+  </script>
+</body>
+</html>
