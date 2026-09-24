@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Ignara · 0.23</title>
+  <title>Ignara · 0.24</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -164,101 +164,91 @@
     .confirm-actions button:active { opacity: 0.7; }
     .confirm-actions .ghost { color: var(--muted); }
 
-    /* Codex rail — vertical entry slider (phone-first, Aristide-inspired) */
+    /* Codex rail — top horizontal tick bar (phone-first, Aristide-inspired) */
     #codex-rail {
       position: fixed;
-      left: 0; top: 0; bottom: 0;
-      width: var(--rail-w, 2.75rem);
+      top: 0; left: 0; right: 0;
+      height: calc(var(--rail-h, 1.35rem) + env(safe-area-inset-top));
       z-index: 50;
       display: none;
-      flex-direction: column;
-      align-items: stretch;
-      overflow-x: hidden;
-      overflow-y: auto;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      border-right: 1px solid var(--line);
+      overscroll-behavior-x: contain;
+      border-bottom: 1px solid var(--line);
       background: #fff;
-      padding: max(0.55rem, env(safe-area-inset-top)) 0 max(0.75rem, env(safe-area-inset-bottom));
+      padding:
+        env(safe-area-inset-top)
+        max(0.65rem, env(safe-area-inset-right))
+        0
+        max(0.65rem, env(safe-area-inset-left));
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
     #codex-rail::-webkit-scrollbar { display: none; }
     body.has-codex-rail {
-      --rail-w: 2.75rem;
+      --rail-h: 1.35rem;
     }
     body.has-codex-rail #codex-rail { display: flex; }
     body.has-codex-rail #app {
-      padding-left: max(calc(var(--rail-w) + 0.85rem), env(safe-area-inset-left));
+      padding-top: calc(var(--rail-h) + env(safe-area-inset-top) + 1.15rem);
     }
-    @media (min-width: 420px) {
-      body.has-codex-rail { --rail-w: 3.25rem; }
-    }
-    #codex-rail .rail-group {
+    #codex-rail .rail-gap {
       flex-shrink: 0;
-      margin: 0.55rem 0.1rem 0.15rem;
-      padding: 0.2rem 0.1rem;
-      color: var(--muted);
-      font-size: 0.5rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      text-align: center;
-      line-height: 1.2;
-      border-top: 1px solid var(--line);
+      width: 0.55rem;
+      height: 100%;
+      pointer-events: none;
     }
-    #codex-rail .rail-group:first-child {
-      border-top: none;
-      margin-top: 0.15rem;
+    #codex-rail .rail-gap.is-section {
+      width: 0.95rem;
     }
     #codex-rail a.rail-item {
       flex-shrink: 0;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.12rem;
-      margin: 0.05rem 0.15rem;
-      padding: 0.32rem 0.12rem;
-      min-height: 1.65rem;
-      color: var(--muted);
-      font-size: 0.5625rem;
-      letter-spacing: 0.01em;
-      line-height: 1.15;
-      text-align: center;
-      word-break: break-word;
-      hyphens: auto;
-      border-radius: 0;
-      transition: font-size 0.18s ease, padding 0.18s ease, color 0.15s ease, min-height 0.18s ease;
+      width: 1rem;
+      height: 1.35rem;
+      margin: 0;
+      padding: 0;
+      color: inherit;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
     }
-    #codex-rail a.rail-item:active { opacity: 0.65; }
-    #codex-rail a.rail-item .rail-label {
+    #codex-rail a.rail-item:active { opacity: 0.55; }
+    #codex-rail a.rail-item .rail-tick {
       display: block;
-      max-width: 100%;
+      width: 1px;
+      height: 0.42rem;
+      background: #c4c4c4;
+      border-radius: 0;
+      transition:
+        width 0.18s ease,
+        height 0.18s ease,
+        background-color 0.15s ease,
+        transform 0.18s ease;
+      transform-origin: center center;
     }
-    #codex-rail a.rail-item .lock-ico {
-      width: 9px; height: 11px; opacity: 0.75;
-    }
-    #codex-rail a.rail-item.is-locked {
-      color: #999;
+    #codex-rail a.rail-item.is-locked .rail-tick {
+      background: #d6d6d6;
     }
     #codex-rail a.rail-item.is-current {
-      color: var(--fg);
-      font-size: 0.6875rem;
-      font-weight: 500;
-      padding: 0.55rem 0.15rem;
-      min-height: 2.35rem;
-      letter-spacing: 0.02em;
+      width: 1.35rem;
     }
-    #codex-rail a.rail-item.is-current .lock-ico {
-      width: 10px; height: 12px; opacity: 1;
+    #codex-rail a.rail-item.is-current .rail-tick {
+      width: 2.5px;
+      height: 0.95rem;
+      background: var(--fg);
     }
   </style>
 </head>
 <body>
   <div id="fx" aria-hidden="true"><div id="fx-layer"></div></div>
-  <nav id="codex-rail" aria-label="Índice del códex" hidden></nav>
+  <nav id="codex-rail" aria-label="Progreso del códex" hidden></nav>
   <div id="app">
     <section class="screen" id="home">
       <div class="center">
@@ -266,7 +256,7 @@
           <canvas id="boot-canvas" width="497" height="152"></canvas>
         </button>
         <span class="tm">™</span>
-        <span class="muted">versión 0.23 · tocar para entrar</span>
+        <span class="muted">versión 0.24 · tocar para entrar</span>
         <button type="button" id="boot-gyro" hidden>Activar inclinación</button>
       </div>
     </section>
@@ -1684,38 +1674,10 @@ Para consultas sobre derechos: contactar al autor.</p>
         "</svg>";
 
 
-      /* --- Codex rail (vertical entry slider) --- */
+      /* --- Codex rail (top horizontal tick bar) --- */
       var RAIL_VIEWS = {
         "character-sheets": true,
         "places": true
-      };
-      var SHORT_LABEL = {
-        "char-sam": "Sam",
-        "char-mila": "Mila",
-        "char-kai": "Kai",
-        "char-tess": "Tess",
-        "char-sakura": "Sakura",
-        "char-devon": "Devon",
-        "char-becca": "Becca",
-        "char-kai-l2": "Kai2",
-        "char-jess": "Jess",
-        "place-pueblo": "Pueblo",
-        "place-desierto": "Desierto",
-        "place-dunas": "Dunas",
-        "place-templo": "Templo",
-        "place-taiga": "Taiga",
-        "place-costa-becca": "Costa B.",
-        "place-arena-negra": "Arena n.",
-        "place-praderas": "Praderas",
-        "place-costa-tropical": "Tropical",
-        "place-komodo": "Komodo",
-        "place-ring": "Ring",
-        "place-rave": "Rave",
-        "place-flor": "Flor",
-        "place-casino": "Casino",
-        "place-yate": "Yate",
-        "place-circuito": "Circuito",
-        "place-nieve": "Nieve"
       };
       var railEl = document.getElementById("codex-rail");
       var railBuilt = false;
@@ -1752,7 +1714,6 @@ Para consultas sobre derechos: contactar al autor.</p>
                 id: id,
                 book: a.getAttribute("data-book") || "",
                 title: title,
-                short: SHORT_LABEL[id] || title,
                 kind: kind,
                 group: group
               });
@@ -1770,20 +1731,25 @@ Para consultas sobre derechos: contactar al autor.</p>
         railEl.innerHTML = "";
         var lastKind = "";
         var lastGroup = "";
-        entries.forEach(function (e) {
+        entries.forEach(function (e, idx) {
           if (e.kind !== lastKind) {
-            var kindLabel = document.createElement("div");
-            kindLabel.className = "rail-group";
-            kindLabel.textContent = e.kind === "char" ? "Chars" : "Places";
-            railEl.appendChild(kindLabel);
+            if (idx > 0) {
+              var secGap = document.createElement("div");
+              secGap.className = "rail-gap is-section";
+              secGap.setAttribute("aria-hidden", "true");
+              railEl.appendChild(secGap);
+            }
             lastKind = e.kind;
             lastGroup = "";
-          }
-          if (e.group && e.group !== lastGroup) {
-            var g = document.createElement("div");
-            g.className = "rail-group";
-            g.textContent = e.group.replace(/^Ignara\s+/i, "L");
-            railEl.appendChild(g);
+          } else if (e.group && e.group !== lastGroup) {
+            if (lastGroup) {
+              var gGap = document.createElement("div");
+              gGap.className = "rail-gap";
+              gGap.setAttribute("aria-hidden", "true");
+              railEl.appendChild(gGap);
+            }
+            lastGroup = e.group;
+          } else if (e.group && !lastGroup) {
             lastGroup = e.group;
           }
           var a = document.createElement("a");
@@ -1795,10 +1761,10 @@ Para consultas sobre derechos: contactar al autor.</p>
           a.setAttribute("data-rail-id", e.id);
           a.setAttribute("title", e.title);
           a.setAttribute("aria-label", e.title);
-          var label = document.createElement("span");
-          label.className = "rail-label";
-          label.textContent = e.short;
-          a.appendChild(label);
+          var tick = document.createElement("span");
+          tick.className = "rail-tick";
+          tick.setAttribute("aria-hidden", "true");
+          a.appendChild(tick);
           railEl.appendChild(a);
         });
         railBuilt = true;
@@ -1810,19 +1776,10 @@ Para consultas sobre derechos: contactar al autor.</p>
         railEl.querySelectorAll("a.rail-item").forEach(function (a) {
           var book = a.getAttribute("data-book");
           var unlocked = isBookUnlocked(book);
-          var label = a.querySelector(".rail-label");
-          var existingLock = a.querySelector(".lock-ico");
           if (!unlocked) {
             a.classList.add("is-locked");
-            if (!existingLock) {
-              a.insertAdjacentHTML("beforeend", LOCK_SVG);
-            }
           } else {
             a.classList.remove("is-locked");
-            if (existingLock && existingLock.parentNode) existingLock.parentNode.removeChild(existingLock);
-          }
-          if (label && !label.textContent) {
-            /* keep */
           }
         });
       }
@@ -1845,7 +1802,7 @@ Para consultas sobre derechos: contactar al autor.</p>
           var cur = railEl.querySelector('a.rail-item[data-rail-id="' + currentId + '"]');
           if (cur && cur.scrollIntoView) {
             try {
-              cur.scrollIntoView({ block: "nearest", inline: "nearest" });
+              cur.scrollIntoView({ block: "nearest", inline: "center" });
             } catch (err) {
               cur.scrollIntoView(false);
             }
@@ -2000,8 +1957,11 @@ Para consultas sobre derechos: contactar al autor.</p>
           var targetId = href.slice(1);
           var linkBook = navEl.getAttribute("data-book");
           if (linkBook && !isBookUnlocked(linkBook)) {
-            var titleSpan = navEl.children[0];
-            var title = titleSpan ? titleSpan.textContent.trim() : "";
+            var title = navEl.getAttribute("aria-label") || navEl.getAttribute("title") || "";
+            if (!title) {
+              var titleSpan = navEl.children[0];
+              title = titleSpan ? titleSpan.textContent.trim() : "";
+            }
             setPendingUnlock(linkBook, title);
             fadeNav("progreso");
             return;
